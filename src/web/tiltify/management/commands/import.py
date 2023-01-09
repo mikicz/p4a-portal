@@ -1,8 +1,8 @@
 from django.core.management import BaseCommand
 
 from src.client import schema
-from src.client.api import get_campaign, get_rewards
-from src.web.tiltify.models import Campaign, Reward
+from src.client.api import get_campaign, get_rewards, get_polls
+from src.web.tiltify.models import Campaign, Reward, Poll, Option
 
 
 class Command(BaseCommand):
@@ -27,7 +27,32 @@ class Command(BaseCommand):
 
     def import_polls(self, campaign: Campaign):
         print("Importing polls details")
-        pass
+        polls = get_polls(campaign.id).data
+        existing_polls = {x.id: x for x in Poll.objects.all()}
+        api_poll: schema.Poll
+        for api_poll in polls:
+            if api_poll.id in existing_polls:
+                poll = existing_polls[api_poll.id]
+            else:
+                poll = Poll(campaign_id=campaign.id)
+
+            poll.name = api_poll.name
+            poll.active = api_poll.active
+            poll.created_at = api_poll.created_at
+            poll.updated_at = api_poll.updated_at
+            poll.save()
+
+            for api_option in api_poll.options:
+                Option.objects.update_or_create(
+                    id=api_option.id,
+                    poll=poll,
+                    defaults={
+                        "name": api_option.name,
+                        "total_amount_raised": api_option.total_amount_raised,
+                        "created_at": api_option.created_at,
+                        "updated_at": api_option.updated_at,
+                    },
+                )
 
     def import_rewards(self, campaign: Campaign):
         print("Importing rewards details")
