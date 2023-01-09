@@ -15,12 +15,15 @@ def _make_request(
     *,
     sub_url: Optional[str] = None,
     data: Optional[dict[str, Any]] = None,
+    print_url: bool = False,
 ):
     full_url = f"https://tiltify.com/api/v3/campaigns/{campaign_id}/" + (sub_url or "")
+    if print_url:
+        print(full_url, data)
 
     response = requests.get(
         full_url,
-        data=data,
+        params=data,
         headers={"Authorization": "Bearer {}".format(api_token)},
     )
     response.raise_for_status()
@@ -39,12 +42,14 @@ def get_polls(campaign_id: int) -> PollResponse:
     return _make_request(campaign_id, PollResponse, sub_url="polls")
 
 
-def get_donations(campaign_id: int, before: Optional[int] = None) -> DonationResponse:
+def get_donations(campaign_id: int, before: Optional[int] = None, after: Optional[int] = None) -> DonationResponse:
     data = {"count": 100}
     if before is not None:
         data["before"] = before
+    if after is not None:
+        data["after"] = after
 
-    return _make_request(campaign_id, DonationResponse, sub_url="donations", data=data)
+    return _make_request(campaign_id, DonationResponse, sub_url="donations", data=data, print_url=True)
 
 
 if __name__ == "__main__":

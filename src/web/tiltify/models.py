@@ -44,6 +44,6 @@ class Donation(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
     name = models.CharField(max_length=255)
-    comment = models.CharField(max_length=255, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
     completed_at = models.DateTimeField()
     reward = models.ForeignKey(Reward, on_delete=models.CASCADE, null=True, blank=True)

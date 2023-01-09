@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+import urllib.parse
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import BaseCommand
 
 from src.client import schema
-from src.client.api import get_campaign, get_rewards, get_polls
-from src.web.tiltify.models import Campaign, Reward, Poll, Option
+from src.client.api import get_campaign, get_rewards, get_polls, get_donations
+from src.web.tiltify.models import Campaign, Reward, Poll, Option, Donation
 
 
 class Command(BaseCommand):
@@ -36,6 +41,7 @@ class Command(BaseCommand):
             else:
                 poll = Poll(campaign_id=campaign.id)
 
+            poll.id = api_poll.id
             poll.name = api_poll.name
             poll.active = api_poll.active
             poll.created_at = api_poll.created_at
@@ -79,4 +85,36 @@ class Command(BaseCommand):
 
     def import_donations(self, campaign: Campaign):
         print("Importing donations details")
-        pass
+
+        to_create: list[schema.Donation] = []
+        all_imported_count = 0
+
+        before: int | None = None
+        response: schema.DonationResponse | None
+        imported_ids = set(Donation.objects.filter(campaign=campaign).values_list("id", flat=True))
+        while True:
+            response = get_donations(campaign.id, before=before)
+
+            not_imported_yet = [x for x in response.data if x.id not in imported_ids]
+            if not not_imported_yet:
+                all_imported_count += 1
+
+            to_create.extend(not_imported_yet)
+            imported_ids.update([x.id for x in response.data])
+
+            if response.links.prev is None or not response.data or all_imported_count >= 5:
+                break
+
+            parsed_url = urllib.parse.urlparse(response.links.prev)
+            query = dict(urllib.parse.parse_qsl(parsed_url.query))
+            before = query.get("before")
+            if before is not None:
+                before = int(before)
+
+            if len(to_create) >= 10_000:
+                Donation.objects.bulk_create(
+                    [Donation(campaign=campaign, **api_donation.dict()) for api_donation in to_create]
+                )
+                to_create = []
+
+        Donation.objects.bulk_create([Donation(campaign=campaign, **api_donation.dict()) for api_donation in to_create])
