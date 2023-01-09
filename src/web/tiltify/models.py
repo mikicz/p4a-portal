@@ -2,7 +2,11 @@ from django.db import models
 
 
 class Campaign(models.Model):
-    pass
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    slug = models.CharField(max_length=255, null=True, blank=True)
+    url = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
 
 
 class Reward(models.Model):

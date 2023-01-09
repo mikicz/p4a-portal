@@ -5,7 +5,7 @@ from src.web.tiltify.models import Campaign, Reward, Poll, Option, Donation
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("id", "name")
 
 
 @admin.register(Reward)

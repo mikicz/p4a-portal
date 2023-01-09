@@ -25,6 +25,10 @@ class Meta(BaseTiltifyModel):
 
 class Campaign(BaseTiltifyModel):
     id: int
+    name: str
+    slug: str
+    url: Optional[str]
+    description: str
 
 
 class Reward(BaseTiltifyModel):
