@@ -31,10 +31,24 @@ class Campaign(BaseTiltifyModel):
     description: str
 
 
+class RewardImage(BaseTiltifyModel):
+    src: str
+    alt: str
+    width: int
+    height: int
+
+
 class Reward(BaseTiltifyModel):
     id: int
     name: str
     amount: float
+    description: str
+    kind: str
+    quantity: Optional[str]
+    remaining: Optional[str]
+    currency: str
+    active: bool
+    image: RewardImage
 
 
 class Option(BaseTiltifyModel):

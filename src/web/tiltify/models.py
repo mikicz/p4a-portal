@@ -12,6 +12,16 @@ class Campaign(models.Model):
 class Reward(models.Model):
     name = models.CharField(max_length=255)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
+    description = models.TextField(null=True)
+    kind = models.CharField(max_length=255, null=True)
+    quantity = models.IntegerField(null=True)
+    remaining = models.IntegerField(null=True)
+    currency = models.CharField(max_length=255, null=True)
+    active = models.BooleanField(null=True)
+    image_src = models.CharField(max_length=255, null=True)
+    image_alt = models.CharField(max_length=255, null=True)
+    image_width = models.IntegerField(null=True)
+    image_height = models.IntegerField(null=True)
 
 
 class Poll(models.Model):
