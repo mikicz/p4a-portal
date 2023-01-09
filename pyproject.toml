@@ -11,6 +11,7 @@ packages = [{include = "p4a_portal"}]
 python = "^3.11"
 pydantic = "^1.10.4"
 ujson = "^5.7.0"
+requests = "^2.28.1"
 
 [build-system]
 requires = ["poetry-core"]

@@ -55,7 +55,7 @@ class Donation(BaseTiltifyModel):
     id: int
     amount: float
     name: str
-    comment: str
+    comment: Optional[str]
     completed_at: datetime.datetime
     reward_id: Optional[int]
 
