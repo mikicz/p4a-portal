@@ -107,11 +107,12 @@ class CampaignView(DetailView):
 
         df = df[["after_decimal", "time"]]
         decimal_all = self.get_decimal_counter(df)
-        # TODO: fix hardcoded
+        if self.object.stream_start is None:
+            start, end = df["time"].min(), df["time"].max()
+        else:
+            start, end = self.object.stream_start, self.object.stream_end
+
         decimal_stream = self.get_decimal_counter(
-            df[
-                (df["time"] >= pd.to_datetime(datetime(2022, 2, 25, 17, 0, 0, tzinfo=UTC)))
-                & (df["time"] <= pd.to_datetime(datetime(2022, 2, 27, 17, 0, 0, tzinfo=UTC)))
-            ]
+            df[(df["time"] >= pd.to_datetime(start)) & (df["time"] <= pd.to_datetime(end))]
         )
         return decimal_all.to_dict("records"), decimal_stream.to_dict("records")

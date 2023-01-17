@@ -14,6 +14,8 @@ class Campaign(models.Model):
     slug = models.CharField(max_length=255, null=True, blank=True)
     url = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    stream_start = models.DateTimeField(null=True, blank=True)
+    stream_end = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Campaign<{self.id}, {self.name}>"
