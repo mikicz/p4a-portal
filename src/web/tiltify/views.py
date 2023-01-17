@@ -1,7 +1,8 @@
 import json
 
 import pandas as pd
-from django.db.models import Count, Sum
+from django.db import models
+from django.db.models import Count, Sum, ExpressionWrapper, Q
 from django.views.generic import ListView, DetailView
 from .models import Campaign, Donation, Reward
 
@@ -19,6 +20,7 @@ class CampaignView(DetailView):
         data = super().get_context_data(**kwargs)
 
         data["reward_statistics"] = json.dumps(self.get_reward_statistics(), indent=2)
+        data["anonymous_statistics"] = json.dumps(self.get_anonymous_statistics(), indent=2)
 
         return data
 
@@ -37,5 +39,17 @@ class CampaignView(DetailView):
         df["average"] = df["total"] / df["count"]
         df.sort_values(by=["total"], inplace=True, ascending=False)
         df.drop(columns={"reward_id"}, inplace=True)
+
+        return df.to_dict("records")
+
+    def get_anonymous_statistics(self):
+        df = pd.DataFrame.from_records(
+            Donation.objects.filter(campaign=self.object)
+            .annotate(is_anonymous=ExpressionWrapper(Q(name="Anonymous"), output_field=models.BooleanField()))
+            .values("is_anonymous")
+            .annotate(count=Count("id"), total=Sum("amount"))
+        ).astype({"total": float})
+        df["who"] = df["is_anonymous"].map(lambda x: "Anonymous" if x else "Other")
+        df.drop(columns={"is_anonymous"}, inplace=True)
 
         return df.to_dict("records")
