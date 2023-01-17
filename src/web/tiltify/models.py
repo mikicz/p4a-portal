@@ -1,4 +1,11 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from django.db import models
+from decimal import Decimal
+
+from django.utils.functional import cached_property
 
 
 class Campaign(models.Model):
@@ -34,6 +41,18 @@ class Poll(models.Model):
     active = models.BooleanField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
+    @cached_property
+    def total(self) -> Decimal:
+        return sum([x.total_amount_raised for x in self.option_set.all()])
+
+    @cached_property
+    def winning(self) -> Optional["Option"]:
+        max_amount = max([x.total_amount_raised for x in self.option_set.all()])
+        for option in self.option_set.all():
+            if option.total_amount_raised == max_amount:
+                return option
+        return None
 
 
 class Option(models.Model):

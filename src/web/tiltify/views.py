@@ -1,12 +1,13 @@
 import json
 from collections import Counter
-from datetime import datetime, tzinfo, UTC
+from datetime import datetime, UTC
 
 import pandas as pd
 from django.db import models
 from django.db.models import Count, Sum, ExpressionWrapper, Q
 from django.views.generic import ListView, DetailView
-from .models import Campaign, Donation, Reward
+
+from .models import Campaign, Donation, Reward, Poll
 
 
 class CampaignsView(ListView):
@@ -27,6 +28,8 @@ class CampaignView(DetailView):
         war, war_stream = self.get_decimal_war_statistics()
         data["decimal_war_statistics"] = json.dumps(war, indent=2)
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
+
+        data["polls"] = Poll.objects.filter(campaign=self.object).prefetch_related("option_set").order_by("created_at")
 
         return data
 

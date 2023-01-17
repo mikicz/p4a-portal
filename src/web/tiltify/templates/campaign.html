@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <html>
 <head>
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
@@ -94,6 +96,37 @@
 </div>
 <div style="max-width: 500px; margin-top: 50px">
     <table id="decimal-war-stream-statistics"></table>
+</div>
+<div>
+    <table>
+        <thead>
+        <tr>
+            <th>Question</th>
+            <th>Created</th>
+            <th>Finished</th>
+            <th>Total raised</th>
+            <th>Option</th>
+            <th>Raused</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for poll in polls %}
+            <tr>
+                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
+                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
+                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
+                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
+            {% for option in poll.option_set.all %}
+                {% if not forloop.first %}
+                    <tr>
+                {% endif %}
+                    <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}{% if poll.winning == option %}</strong>{% endif %}</td>
+                    <td>{% if poll.winning == option %}<strong>{% endif %}${{ option.total_amount_raised|floatformat:2|intcomma }}{% if poll.winning == option %}</strong>{% endif %}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 </body>
