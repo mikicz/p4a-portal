@@ -19,6 +19,7 @@
     <script type="application/javascript">
         let rewardStatistics = {{ reward_statistics|safe }};
         let anonymousStatistics = {{ anonymous_statistics|safe }};
+        let decimalStatistics = {{ decimal_statistics|safe }};
         let moneyFormatterParams = {"symbol": "$"};
         function percentage(cell, formatterParams, onRendered) {
             return Math.round(cell.getValue() * 100) / 100 + " %"
@@ -53,6 +54,15 @@
                      "formatterParams": moneyFormatterParams, "width": 200},
                 ]
             });
+            $("#decimal-statistics").tabulator({
+                data: decimalStatistics,
+                layout: "fitColumns",
+                height: 250,
+                columns: [
+                    {"title": "Value after decimal point", "field": "after_decimal"},
+                    {"title": "Count", "field": "amount"},
+                ]
+            });
         })
 
     </script>
@@ -65,6 +75,9 @@
 </div>
 <div style="max-width: 500px; margin-top: 50px">
     <table id="anonymous-statistics"></table>
+</div>
+<div style="max-width: 500px; margin-top: 50px">
+    <table id="decimal-statistics"></table>
 </div>
 
 </body>

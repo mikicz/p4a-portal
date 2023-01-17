@@ -21,6 +21,7 @@ class CampaignView(DetailView):
 
         data["reward_statistics"] = json.dumps(self.get_reward_statistics(), indent=2)
         data["anonymous_statistics"] = json.dumps(self.get_anonymous_statistics(), indent=2)
+        data["decimal_statistics"] = json.dumps(self.get_decimal_statistics(), indent=2)
 
         return data
 
@@ -51,5 +52,16 @@ class CampaignView(DetailView):
         ).astype({"total": float})
         df["who"] = df["is_anonymous"].map(lambda x: "Anonymous" if x else "Other")
         df.drop(columns={"is_anonymous"}, inplace=True)
+
+        return df.to_dict("records")
+
+    def get_decimal_statistics(self):
+        df = pd.DataFrame.from_records(Donation.objects.filter(campaign=self.object).values("amount"))
+
+        df["after_decimal"] = df["amount"].map(lambda x: x % 1)
+
+        df = df.groupby(["after_decimal"]).count().reset_index().astype({"after_decimal": "string"})
+        df["after_decimal"] = df["after_decimal"].str.split(".", expand=True)[1]
+        df.sort_values(by=["amount"], inplace=True, ascending=False)
 
         return df.to_dict("records")
