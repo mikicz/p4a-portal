@@ -1,0 +1,61 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+            integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
+            integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.3/js/tabulator.min.js"
+            integrity="sha512-xu/xzHeJxvPLt6tuy68mvBtY4XCDpGmMe1AV4+S1viFUvy0Qygmoq1yePeDenRRNRSqYx3GvucTAnsGiO0FRaA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.3/js/jquery_wrapper.min.js"
+            integrity="sha512-Q+u5tqLUv7zbQ1QBm6Pcwc2N2PbqrRC//Ze2YGnlSe5TBbO0KrCYZ/WvgjTlNnzVtOHU9pNoztQjJxpSXa5boQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.3/css/tabulator.min.css"
+          integrity="sha512-gHU0A38WiT7Jyubh7KcU6af64wRVBnNEB1541Ue5W050dRL/f21IWkAD8sl85nVjPyLnbffiXsCborGDQ55bYQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <script type="application/javascript">
+        let rewardStatistics = {{ reward_statistics|safe }};
+        let moneyFormatterParams = {"symbol": "$"};
+        function percentage(cell, formatterParams, onRendered) {
+            return Math.round(cell.getValue() * 100) / 100 + " %"
+        }
+        $(document).ready(function () {
+            $("#reward-statistics").tabulator({
+                data: rewardStatistics,
+                layout: "fitColumns",
+                width: 1000,
+                height: 500,
+                columns: [
+                    {"title": "Reward name", "field": "name"},
+                    {"title": "Count", "field": "count", "width": 100},
+                    {"title": "Total raised", "field": "total", "formatter": "money",
+                     "formatterParams": moneyFormatterParams, "width": 200},
+                    {"title": "Raised over base price", "field": "raised_over_base", "formatter": "money",
+                     "formatterParams": moneyFormatterParams, "width": 200},
+                    {"title": "Percentage of total", "field": "percentage_of_total", "formatter": percentage,
+                     "width": 200},
+                    {"title": "Base price", "field": "base_price", "formatter": "money",
+                     "formatterParams": moneyFormatterParams, "width": 200},
+                    {"title": "Average donation", "field": "average", "formatter": "money",
+                     "formatterParams": moneyFormatterParams, "width": 200},
+                ]
+            });
+        })
+
+    </script>
+
+    <title>{{ object }}</title>
+</head>
+<body>
+<div style="max-width: 1500px">
+    <table id="reward-statistics"></table>
+</div>
+
+</body>
+
+</html>
+
+

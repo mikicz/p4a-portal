@@ -8,8 +8,12 @@ class Campaign(models.Model):
     url = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return f"Campaign<{self.id}, {self.name}>"
+
 
 class Reward(models.Model):
+    # TODO: add campaign
     name = models.CharField(max_length=255)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
     description = models.TextField(null=True)
