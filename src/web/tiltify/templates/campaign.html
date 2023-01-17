@@ -20,6 +20,8 @@
         let rewardStatistics = {{ reward_statistics|safe }};
         let anonymousStatistics = {{ anonymous_statistics|safe }};
         let decimalStatistics = {{ decimal_statistics|safe }};
+        let decimalWarStatistics = {{ decimal_war_statistics|safe }};
+        let decimalWarStreamStatistics = {{ decimal_war_stream_statistics|safe }};
         let moneyFormatterParams = {"symbol": "$"};
         function percentage(cell, formatterParams, onRendered) {
             return Math.round(cell.getValue() * 100) / 100 + " %"
@@ -54,14 +56,22 @@
                      "formatterParams": moneyFormatterParams, "width": 200},
                 ]
             });
-            $("#decimal-statistics").tabulator({
-                data: decimalStatistics,
+            let decimalWarColumns = [
+                {"title": "Total after decimal", "field": "after_decimal"},
+                {"title": "Minutes", "field": "minutes"},
+                {"title": "Percentage of total", "field": "percentage_of_total", "formatter": percentage},
+            ];
+            $("#decimal-war-statistics").tabulator({
+                data: decimalWarStatistics,
                 layout: "fitColumns",
                 height: 250,
-                columns: [
-                    {"title": "Value after decimal point", "field": "after_decimal"},
-                    {"title": "Count", "field": "amount"},
-                ]
+                columns: decimalWarColumns,
+            });
+            $("#decimal-war-stream-statistics").tabulator({
+                data: decimalWarStreamStatistics,
+                layout: "fitColumns",
+                height: 250,
+                columns: decimalWarColumns,
             });
         })
 
@@ -78,6 +88,12 @@
 </div>
 <div style="max-width: 500px; margin-top: 50px">
     <table id="decimal-statistics"></table>
+</div>
+<div style="max-width: 500px; margin-top: 50px">
+    <table id="decimal-war-statistics"></table>
+</div>
+<div style="max-width: 500px; margin-top: 50px">
+    <table id="decimal-war-stream-statistics"></table>
 </div>
 
 </body>
