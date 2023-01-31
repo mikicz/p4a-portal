@@ -1,7 +1,17 @@
 {% load humanize %}
 
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+            crossorigin="anonymous"></script>
+
+
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
             integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
             crossorigin="anonymous"></script>
@@ -25,9 +35,11 @@
         let decimalWarStatistics = {{ decimal_war_statistics|safe }};
         let decimalWarStreamStatistics = {{ decimal_war_stream_statistics|safe }};
         let moneyFormatterParams = {"symbol": "$"};
+
         function percentage(cell, formatterParams, onRendered) {
             return Math.round(cell.getValue() * 100) / 100 + " %"
         }
+
         $(document).ready(function () {
             $("#reward-statistics").tabulator({
                 data: rewardStatistics,
@@ -36,16 +48,34 @@
                 columns: [
                     {"title": "Reward name", "field": "name"},
                     {"title": "Count", "field": "count", "width": 100},
-                    {"title": "Total raised", "field": "total", "formatter": "money",
-                     "formatterParams": moneyFormatterParams, "width": 200},
-                    {"title": "Raised over base price", "field": "raised_over_base", "formatter": "money",
-                     "formatterParams": moneyFormatterParams, "width": 200},
-                    {"title": "Percentage of total", "field": "percentage_of_total", "formatter": percentage,
-                     "width": 200},
-                    {"title": "Base price", "field": "base_price", "formatter": "money",
-                     "formatterParams": moneyFormatterParams, "width": 200},
-                    {"title": "Average donation", "field": "average", "formatter": "money",
-                     "formatterParams": moneyFormatterParams, "width": 200},
+                    {
+                        "title": "Total raised", "field": "total", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 200
+                    },
+                    {
+                        "title": "Raised over base price", "field": "raised_over_base", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 200
+                    },
+                    {
+                        "title": "Percentage of total", "field": "percentage_of_total", "formatter": percentage,
+                        "width": 200
+                    },
+                    {
+                        "title": "Base price", "field": "base_price", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 200
+                    },
+                    {
+                        "title": "Average donation", "field": "average", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 200
+                    },
+                ]
+            });
+            $("#decimal-statistics").tabulator({
+                data: decimalStatistics,
+                layout: "fitColumns",
+                columns: [
+                    {"title": "After decimal", "field": "after_decimal"},
+                    {"title": "Amount", "field": "amount"},
                 ]
             });
             $("#anonymous-statistics").tabulator({
@@ -54,10 +84,13 @@
                 columns: [
                     {"title": "Who", "field": "who"},
                     {"title": "Count", "field": "count", "width": 100},
-                    {"title": "Total raised", "field": "total", "formatter": "money",
-                     "formatterParams": moneyFormatterParams, "width": 200},
+                    {
+                        "title": "Total raised", "field": "total", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 200
+                    },
                 ]
             });
+
             let decimalWarColumns = [
                 {"title": "Total after decimal", "field": "after_decimal"},
                 {"title": "Minutes", "field": "minutes"},
@@ -82,52 +115,105 @@
     <title>{{ object }}</title>
 </head>
 <body>
-<div style="max-width: 1500px">
-    <table id="reward-statistics"></table>
-</div>
-<div style="max-width: 500px; margin-top: 50px">
-    <table id="anonymous-statistics"></table>
-</div>
-<div style="max-width: 500px; margin-top: 50px">
-    <table id="decimal-statistics"></table>
-</div>
-<div style="max-width: 500px; margin-top: 50px">
-    <table id="decimal-war-statistics"></table>
-</div>
-<div style="max-width: 500px; margin-top: 50px">
-    <table id="decimal-war-stream-statistics"></table>
-</div>
-<div>
-    <table>
-        <thead>
-        <tr>
-            <th>Question</th>
-            <th>Created (UTC)</th>
-            <th>Finished (UTC)</th>
-            <th>Total raised</th>
-            <th>Option</th>
-            <th>Raised</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for poll in polls %}
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="rewards-tab" data-bs-toggle="tab" data-bs-target="#rewards-tab-pane"
+                type="button"
+                role="tab" aria-controls="rewards-tab-pane" aria-selected="true">
+            Reward statistics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="anonymous-tab" data-bs-toggle="tab" data-bs-target="#anonymous-tab-pane"
+                type="button"
+                role="tab" aria-controls="anonymous-tab-pane" aria-selected="false">
+            Anonymous statistics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="decimal-stats-tab" data-bs-toggle="tab" data-bs-target="#decimal-stats-tab-pane"
+                type="button"
+                role="tab" aria-controls="decimal-stats-tab-pane" aria-selected="false">
+            Decimal statistics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="decimal-war-tab" data-bs-toggle="tab" data-bs-target="#decimal-war-tab-pane"
+                type="button" role="tab" aria-controls="decimal-war-tab-pane" aria-selected="false">
+            Decimal war
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="polls-tab" data-bs-toggle="tab" data-bs-target="#polls-tab-pane"
+                type="button" role="tab" aria-controls="polls-tab-pane" aria-selected="false">
+            Polls
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="rewards-tab-pane" role="tabpanel" aria-labelledby="rewards-tab"
+         tabindex="0">
+        <div style="max-width: 1500px">
+            <table id="reward-statistics"></table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="anonymous-tab-pane" role="tabpanel" aria-labelledby="anonymous-tab" tabindex="0">
+        <div style="max-width: 500px; margin-top: 50px">
+            <table id="anonymous-statistics"></table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="decimal-stats-tab-pane" role="tabpanel" aria-labelledby="decimal-stats-tab"
+         tabindex="0">
+        <div style="max-width: 500px; margin-top: 50px">
+            <table id="decimal-statistics"></table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="decimal-war-tab-pane" role="tabpanel" aria-labelledby="decimal-war-tab" tabindex="0">
+        <div style="max-width: 500px; margin-top: 50px">
+            <table id="decimal-war-statistics"></table>
+        </div>
+        <div style="max-width: 500px; margin-top: 50px">
+            <table id="decimal-war-stream-statistics"></table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="polls-tab-pane" role="tabpanel" aria-labelledby="polls-tab" tabindex="0">
+        <table class="table">
+            <thead>
             <tr>
-                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
-                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
-                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
-                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
-            {% for option in poll.option_set.all %}
-                {% if not forloop.first %}
-                    <tr>
-                {% endif %}
-                    <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}{% if poll.winning == option %}</strong>{% endif %}</td>
-                    <td>{% if poll.winning == option %}<strong>{% endif %}${{ option.total_amount_raised|floatformat:2|intcomma }}{% if poll.winning == option %}</strong>{% endif %}</td>
-                </tr>
+                <th>Question</th>
+                <th>Created (UTC)</th>
+                <th>Finished (UTC)</th>
+                <th>Total raised</th>
+                <th>Option</th>
+                <th>Raised</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for poll in polls %}
+                <tr>
+                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
+                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
+                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
+                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
+                    {% for option in poll.option_set.all %}
+                        {% if not forloop.first %}
+                            <tr>
+                        {% endif %}
+                    <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}
+                        {% if poll.winning == option %}
+                            </strong>{% endif %}</td>
+                    <td>{% if poll.winning == option %}<strong>{% endif %}
+                        ${{ option.total_amount_raised|floatformat:2|intcomma }}{% if poll.winning == option %}
+                            </strong>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
             {% endfor %}
-        {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
+
 
 </body>
 
