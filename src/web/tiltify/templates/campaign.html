@@ -154,7 +154,7 @@
             Polls
         </button>
     </li>
-    <li class="nav-item ms-auto" role="presentation" >
+    <li class="nav-item ms-auto" role="presentation">
         <a class="nav-link" target="_blank" href="https://github.com/mikicz/p4a-portal">GitHub</a>
     </li>
 </ul>
@@ -206,9 +206,8 @@
             </div>
             <div class="row">
                 <div class="col">
-                        <h3>Overall</h3>
+                    <h3>Overall</h3>
                     <div style="max-width: 500px; margin-top: 50px">
-
                         <table id="decimal-war-statistics"></table>
                     </div>
                 </div>
@@ -255,8 +254,8 @@
                                         </strong>{% endif %}</td>
                                 <td>{% if poll.winning == option %}<strong>{% endif %}
                                     ${{ option.total_amount_raised|floatformat:2|intcomma }}
-                                            {% if poll.winning == option %}
-                                                </strong>{% endif %}</td>
+                                    {% if poll.winning == option %}
+                                        </strong>{% endif %}</td>
                                 </tr>
                                 {% endfor %}
                         {% endfor %}
