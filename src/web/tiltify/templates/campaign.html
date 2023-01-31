@@ -99,13 +99,11 @@
             $("#decimal-war-statistics").tabulator({
                 data: decimalWarStatistics,
                 layout: "fitColumns",
-                height: 250,
                 columns: decimalWarColumns,
             });
             $("#decimal-war-stream-statistics").tabulator({
                 data: decimalWarStreamStatistics,
                 layout: "fitColumns",
-                height: 250,
                 columns: decimalWarColumns,
             });
         })
@@ -113,6 +111,12 @@
     </script>
 
     <title>{{ object }}</title>
+
+    <style>
+        .tab-pane {
+            margin: 10px;
+        }
+    </style>
 </head>
 <body>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -134,7 +138,7 @@
         <button class="nav-link" id="decimal-stats-tab" data-bs-toggle="tab" data-bs-target="#decimal-stats-tab-pane"
                 type="button"
                 role="tab" aria-controls="decimal-stats-tab-pane" aria-selected="false">
-            Decimal statistics
+            Decimal value statistics
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -154,63 +158,109 @@
 <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="rewards-tab-pane" role="tabpanel" aria-labelledby="rewards-tab"
          tabindex="0">
-        <div style="max-width: 1500px">
-            <table id="reward-statistics"></table>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Reward statistics</h2>
+                    <div style="max-width: 1500px">
+                        <table id="reward-statistics"></table>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
     <div class="tab-pane fade" id="anonymous-tab-pane" role="tabpanel" aria-labelledby="anonymous-tab" tabindex="0">
-        <div style="max-width: 500px; margin-top: 50px">
-            <table id="anonymous-statistics"></table>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Anonymous statistics</h2>
+                    <div style="max-width: 500px; margin: 0 auto;">
+                        <table id="anonymous-statistics"></table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="tab-pane fade" id="decimal-stats-tab-pane" role="tabpanel" aria-labelledby="decimal-stats-tab"
          tabindex="0">
-        <div style="max-width: 500px; margin-top: 50px">
-            <table id="decimal-statistics"></table>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Decimal value statistics</h2>
+                    <div style="max-width: 500px; margin: 0 auto">
+                        <table id="decimal-statistics"></table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="tab-pane fade" id="decimal-war-tab-pane" role="tabpanel" aria-labelledby="decimal-war-tab" tabindex="0">
-        <div style="max-width: 500px; margin-top: 50px">
-            <table id="decimal-war-statistics"></table>
+        <div class="container">
+            <div class="row">
+                <div class="col"><h2>Decimal wars</h2></div>
+            </div>
+            <div class="row">
+                <div class="col">
+                        <h3>Overall</h3>
+                    <div style="max-width: 500px; margin-top: 50px">
+
+                        <table id="decimal-war-statistics"></table>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3>During stream</h3>
+                    <div style="max-width: 500px; margin-top: 50px">
+                        <table id="decimal-war-stream-statistics"></table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div style="max-width: 500px; margin-top: 50px">
-            <table id="decimal-war-stream-statistics"></table>
-        </div>
+
+
     </div>
     <div class="tab-pane fade" id="polls-tab-pane" role="tabpanel" aria-labelledby="polls-tab" tabindex="0">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Question</th>
-                <th>Created (UTC)</th>
-                <th>Finished (UTC)</th>
-                <th>Total raised</th>
-                <th>Option</th>
-                <th>Raised</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for poll in polls %}
-                <tr>
-                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
-                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
-                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
-                    <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
-                    {% for option in poll.option_set.all %}
-                        {% if not forloop.first %}
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Polls</h2>
+                    <table class="table" style="max-width: 2000px; margin: 0 auto;">
+                        <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th style="min-width: 190px">Created (UTC)</th>
+                            <th style="min-width: 190px">Finished (UTC)</th>
+                            <th style="min-width: 120px">Total raised</th>
+                            <th style="min-width: 250px">Option</th>
+                            <th style="min-width: 120px">Raised</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for poll in polls %}
                             <tr>
-                        {% endif %}
-                    <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}
-                        {% if poll.winning == option %}
-                            </strong>{% endif %}</td>
-                    <td>{% if poll.winning == option %}<strong>{% endif %}
-                        ${{ option.total_amount_raised|floatformat:2|intcomma }}{% if poll.winning == option %}
-                            </strong>{% endif %}</td>
-                    </tr>
-                    {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
+                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
+                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
+                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
+                                {% for option in poll.option_set.all %}
+                                    {% if not forloop.first %}
+                                        <tr>
+                                    {% endif %}
+                                <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}
+                                    {% if poll.winning == option %}
+                                        </strong>{% endif %}</td>
+                                <td>{% if poll.winning == option %}<strong>{% endif %}
+                                    ${{ option.total_amount_raised|floatformat:2|intcomma }}
+                                            {% if poll.winning == option %}
+                                                </strong>{% endif %}</td>
+                                </tr>
+                                {% endfor %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
