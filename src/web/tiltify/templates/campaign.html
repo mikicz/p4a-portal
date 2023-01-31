@@ -44,7 +44,7 @@
             $("#reward-statistics").tabulator({
                 data: rewardStatistics,
                 layout: "fitColumns",
-                height: 500,
+                height: 800,
                 columns: [
                     {"title": "Reward name", "field": "name"},
                     {"title": "Count", "field": "count", "width": 100},
@@ -73,6 +73,7 @@
             $("#decimal-statistics").tabulator({
                 data: decimalStatistics,
                 layout: "fitColumns",
+                height: 800,
                 columns: [
                     {"title": "After decimal", "field": "after_decimal"},
                     {"title": "Amount", "field": "amount"},
@@ -152,6 +153,9 @@
                 type="button" role="tab" aria-controls="polls-tab-pane" aria-selected="false">
             Polls
         </button>
+    </li>
+    <li class="nav-item ms-auto" role="presentation" >
+        <a class="nav-link" target="_blank" href="https://github.com/mikicz/p4a-portal">GitHub</a>
     </li>
 </ul>
 
