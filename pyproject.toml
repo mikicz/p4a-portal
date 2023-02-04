@@ -5,7 +5,6 @@ description = ""
 authors = ["Mikuláš Poul <mikulaspoul@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "p4a_portal"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
