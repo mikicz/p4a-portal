@@ -50,7 +50,7 @@ class CampaignView(DetailView):
         total = df["total"].sum()
         df["percentage_of_total"] = (df["total"] / total) * 100
         df["average"] = df["total"] / df["count"]
-        df.sort_values(by=["total"], inplace=True, ascending=False)
+        df.sort_values(by=["total", "count", "reward_id"], inplace=True, ascending=False)
         df.drop(columns={"reward_id"}, inplace=True)
 
         return df.to_dict("records")
