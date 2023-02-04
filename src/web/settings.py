@@ -118,3 +118,8 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PROJECT_URL = "http://localhost:8000/"
+
+try:
+    from src.web.local_settings import *
+except ImportError:
+    pass
