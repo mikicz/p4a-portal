@@ -111,7 +111,7 @@
 
     </script>
 
-    <title>{{ object }}</title>
+    <title>{% if object.name %}{{ object.name }}{% else %}{{ object }}{% endif %}</title>
 
     <style>
         .tab-pane {
