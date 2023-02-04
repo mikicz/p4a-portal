@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0003_reward_active_reward_currency_reward_description_and_more"),
     ]

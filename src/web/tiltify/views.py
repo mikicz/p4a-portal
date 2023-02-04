@@ -3,11 +3,11 @@ from collections import Counter
 
 import pandas as pd
 from django.db import models
-from django.db.models import Count, Sum, ExpressionWrapper, Q
+from django.db.models import Count, ExpressionWrapper, Q, Sum
 from django.utils import timezone
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView, ListView
 
-from .models import Campaign, Donation, Reward, Poll
+from .models import Campaign, Donation, Poll, Reward
 
 
 class CampaignsView(ListView):
@@ -84,7 +84,6 @@ class CampaignView(DetailView):
         return df.to_dict("records")
 
     def get_decimal_counter(self, df):
-
         start = df.iloc[0].time
         current_value = None
 
@@ -114,7 +113,7 @@ class CampaignView(DetailView):
         df["amount_in_pennies"] = (df["amount"] * 100).astype(int)
         df.sort_values(by=["time"], inplace=True)
         df["tiltify_total"] = df["amount_in_pennies"].cumsum()
-        df["after_decimal"] = (df["tiltify_total"] % 100).map(lambda x: "{:02d}".format(x))
+        df["after_decimal"] = (df["tiltify_total"] % 100).map(lambda x: f"{x:02d}")
 
         df = df[["after_decimal", "time"]]
         decimal_all = self.get_decimal_counter(df)

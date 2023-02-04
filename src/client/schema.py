@@ -1,8 +1,7 @@
 import datetime
-from typing import Optional
 
 import ujson as ujson
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 def to_camel(string: str) -> str:
@@ -27,7 +26,7 @@ class Campaign(BaseTiltifyModel):
     id: int
     name: str
     slug: str
-    url: Optional[str]
+    url: str | None
     description: str
 
 
@@ -44,8 +43,8 @@ class Reward(BaseTiltifyModel):
     amount: float
     description: str
     kind: str
-    quantity: Optional[str]
-    remaining: Optional[str]
+    quantity: str | None
+    remaining: str | None
     currency: str
     active: bool
     image: RewardImage
@@ -73,15 +72,15 @@ class Donation(BaseTiltifyModel):
     id: int
     amount: float
     name: str
-    comment: Optional[str]
+    comment: str | None
     completed_at: datetime.datetime
-    reward_id: Optional[int]
+    reward_id: int | None
 
 
 class Links(BaseTiltifyModel):
-    prev: Optional[str]
-    next: Optional[str]
-    self: Optional[str]
+    prev: str | None
+    next: str | None
+    self: str | None
 
 
 class CampaignResponse(BaseTiltifyModel):

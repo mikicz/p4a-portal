@@ -6,8 +6,8 @@ from django.core.management import BaseCommand
 from django.utils import timezone
 
 from src.client import schema
-from src.client.api import get_campaign, get_rewards, get_polls, get_donations
-from src.web.tiltify.models import Campaign, Reward, Poll, Option, Donation
+from src.client.api import get_campaign, get_donations, get_polls, get_rewards
+from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
 class Command(BaseCommand):
@@ -22,7 +22,6 @@ class Command(BaseCommand):
         campaign.save(update_fields=["stats_refresh_finished"])
         self.import_rewards(campaign)
         self.import_donations(campaign)
-
 
     def import_campaign_details(self, campaign: Campaign):
         print("Importing campaign details")

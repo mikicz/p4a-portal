@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0005_campaign_stream_end_campaign_stream_start"),
     ]

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.web.tiltify.models import Campaign, Reward, Poll, Option, Donation
+from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
 @admin.register(Campaign)

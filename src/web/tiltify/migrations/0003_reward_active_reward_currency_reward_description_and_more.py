@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0002_campaign_description_campaign_name_campaign_slug_and_more"),
     ]

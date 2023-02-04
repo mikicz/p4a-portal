@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0006_campaign_polls_refresh_finished_and_more"),
     ]

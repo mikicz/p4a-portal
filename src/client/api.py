@@ -1,10 +1,10 @@
 import os
-from typing import Optional, Any
+from typing import Any
 
 import requests
 from pydantic import BaseModel
 
-from src.client.schema import CampaignResponse, RewardResponse, PollResponse, DonationResponse
+from src.client.schema import CampaignResponse, DonationResponse, PollResponse, RewardResponse
 
 api_token = os.environ.get("TILTIFY_TOKEN")
 
@@ -13,8 +13,8 @@ def _make_request(
     campaign_id: int,
     response_cls: type[BaseModel],
     *,
-    sub_url: Optional[str] = None,
-    data: Optional[dict[str, Any]] = None,
+    sub_url: str | None = None,
+    data: dict[str, Any] | None = None,
     print_url: bool = False,
 ):
     full_url = f"https://tiltify.com/api/v3/campaigns/{campaign_id}/" + (sub_url or "")
@@ -24,7 +24,7 @@ def _make_request(
     response = requests.get(
         full_url,
         params=data,
-        headers={"Authorization": "Bearer {}".format(api_token)},
+        headers={"Authorization": f"Bearer {api_token}"},
     )
     response.raise_for_status()
     return response_cls.parse_raw(response.content)
@@ -42,7 +42,7 @@ def get_polls(campaign_id: int) -> PollResponse:
     return _make_request(campaign_id, PollResponse, sub_url="polls")
 
 
-def get_donations(campaign_id: int, before: Optional[int] = None, after: Optional[int] = None) -> DonationResponse:
+def get_donations(campaign_id: int, before: int | None = None, after: int | None = None) -> DonationResponse:
     data = {"count": 100}
     if before is not None:
         data["before"] = before
