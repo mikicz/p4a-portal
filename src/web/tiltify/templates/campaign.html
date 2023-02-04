@@ -186,7 +186,7 @@
                         <div class="card">
                             {% if reward.has_image %}
                                <div class="row">
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-6 col-md-8 col-xl-9 col-xxl-10">
                                         <div class="card-body">
                                             <h5 class="card-title">{{ reward.name }} <small>${{ reward.amount }}</small></h5>
                                             <p class="card-text">
@@ -195,7 +195,7 @@
                                             {% include "partials/reward_links.html" %}
                                         </div>
                                     </div>
-                                    <div class="col-sm-2 text-end">
+                                    <div class="col-sm-6 col-md-4 col-xl-3 col-xxl-2 text-end">
                                         <img src="{{ reward.image_src }}" class="img-fluid rounded-end" style="max-height: 175px; max-width: 175px; padding: 5px"
                                              alt="{{ reward.image_alt }}" title="{{ reward.image_alt }}">
                                     </div>
