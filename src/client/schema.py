@@ -22,12 +22,23 @@ class Meta(BaseTiltifyModel):
     status: int
 
 
+class User(BaseTiltifyModel):
+    slug: str
+
+
+class Team(BaseTiltifyModel):
+    slug: str
+
+
 class Campaign(BaseTiltifyModel):
     id: int
     name: str
     slug: str
     url: str | None
     description: str
+    user: User
+    team: Team | None
+    ends_at: datetime.datetime | None
 
 
 class RewardImage(BaseTiltifyModel):

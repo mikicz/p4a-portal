@@ -1,0 +1,16 @@
+<button class="btn btn-sm btn-info">
+    {% if reward.quantity is not None %}
+        {{ reward.remaining }} / {{ reward.quantity }}
+    {% else %}
+        Unlimited
+    {% endif %}
+</button>
+<button class="btn btn-sm btn-secondary">
+    {{ reward.kind|title }}
+</button>
+{% if reward.active and object.supportable %}
+    <a href="https://tiltify.com/{{ object.url }}donate/rewards/{{ reward.id }}" class="btn btn-sm btn-primary"
+       target="_blank">
+        Donate
+    </a>
+{% endif %}

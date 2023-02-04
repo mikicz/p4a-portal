@@ -130,9 +130,17 @@
 <body>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="rewards-tab" data-bs-toggle="tab" data-bs-target="#rewards-tab-pane"
+        <button class="nav-link active" id="rewards-list-tab" data-bs-toggle="tab"
+                data-bs-target="#rewards-list-tab-pane"
                 type="button"
-                role="tab" aria-controls="rewards-tab-pane" aria-selected="true">
+                role="tab" aria-controls="rewards-list-tab-pane" aria-selected="true">
+            Rewards
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="rewards-tab" data-bs-toggle="tab" data-bs-target="#rewards-tab-pane"
+                type="button"
+                role="tab" aria-controls="rewards-tab-pane" aria-selected="false">
             Reward statistics
         </button>
     </li>
@@ -165,7 +173,51 @@
 </ul>
 
 <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="rewards-tab-pane" role="tabpanel" aria-labelledby="rewards-tab"
+    <div class="tab-pane fade show active" id="rewards-list-tab-pane" role="tabpanel" aria-labelledby="rewards-list-tab"
+         tabindex="0">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Rewards</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
+                    {% for reward in rewards %}
+                        <div class="card">
+                            {% if reward.has_image %}
+                               <div class="row">
+                                    <div class="col-sm-10">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ reward.name }} <small>${{ reward.amount }}</small></h5>
+                                            <p class="card-text">
+                                                {{ reward.description }}
+                                            </p>
+                                            {% include "partials/reward_links.html" %}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 text-end">
+                                        <img src="{{ reward.image_src }}" class="img-fluid rounded-end" style="max-height: 175px; max-width: 175px; padding: 5px"
+                                             alt="{{ reward.image_alt }}" title="{{ reward.image_alt }}">
+                                    </div>
+                                </div>
+                            {% else %}
+
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ reward.name }} <small>${{ reward.amount }}</small></h5>
+                                    <p class="card-text">
+                                        {{ reward.description }}
+                                    </p>
+                                    {% include "partials/reward_links.html" %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="tab-pane fade" id="rewards-tab-pane" role="tabpanel" aria-labelledby="rewards-tab"
          tabindex="0">
         <div class="container">
             <div class="row">

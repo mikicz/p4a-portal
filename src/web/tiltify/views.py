@@ -30,6 +30,8 @@ class CampaignView(DetailView):
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
 
         data["polls"] = Poll.objects.filter(campaign=self.object).prefetch_related("option_set").order_by("created_at")
+        data["rewards"] = Reward.objects.filter(campaign=self.object).order_by("-active", "id")
+
         data["now"] = timezone.now()
 
         return data

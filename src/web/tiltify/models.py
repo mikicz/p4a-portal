@@ -11,6 +11,7 @@ class Campaign(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     slug = models.CharField(max_length=255, null=True, blank=True)
     url = models.CharField(max_length=255, null=True, blank=True)
+    supportable = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
     stream_start = models.DateTimeField(null=True, blank=True)
     stream_end = models.DateTimeField(null=True, blank=True)
@@ -37,6 +38,9 @@ class Reward(models.Model):
     image_alt = models.CharField(max_length=255, null=True)
     image_width = models.IntegerField(null=True)
     image_height = models.IntegerField(null=True)
+
+    def has_image(self):
+        return self.image_src != "https://assets.tiltify.com/assets/default-reward.png"
 
 
 class Poll(models.Model):

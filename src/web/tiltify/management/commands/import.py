@@ -28,8 +28,12 @@ class Command(BaseCommand):
         c: schema.Campaign = get_campaign(campaign.id).data
         campaign.name = c.name
         campaign.slug = c.slug
-        campaign.url = c.url
+        if c.team is not None and c.team.slug is not None:
+            campaign.url = f"+{c.team.slug}/{c.slug}/"
+        else:
+            campaign.url = f"@{c.user.slug}/{c.slug}/"
         campaign.description = c.description
+        campaign.supportable = c.ends_at is None or c.ends_at > timezone.now()
         campaign.save()
 
     def import_polls(self, campaign: Campaign):
