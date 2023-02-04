@@ -72,6 +72,7 @@ class Command(BaseCommand):
             Reward.objects.update_or_create(
                 id=reward.id,
                 defaults={
+                    "campaign": campaign,
                     "name": reward.name,
                     "amount": reward.amount,
                     "description": reward.description,
