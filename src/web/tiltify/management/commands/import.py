@@ -12,7 +12,7 @@ from src.web.tiltify.models import Campaign, Reward, Poll, Option, Donation
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        for campaign in Campaign.objects.all():
+        for campaign in Campaign.objects.filter(keep_refreshing=True):
             self.import_campaign(campaign)
 
     def import_campaign(self, campaign: Campaign):

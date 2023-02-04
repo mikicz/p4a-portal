@@ -19,6 +19,7 @@ class Campaign(models.Model):
 
     stats_refresh_finished = models.DateTimeField(null=True, blank=True)
     polls_refresh_finished = models.DateTimeField(null=True, blank=True)
+    keep_refreshing = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Campaign<{self.id}, {self.name}>"
