@@ -39,7 +39,10 @@ class CampaignView(DetailView):
             Donation.objects.filter(campaign=self.object)
             .values("reward_id")
             .annotate(count=Count("id"), total=Sum("amount"))
-        ).astype({"total": float})
+        )
+        if df.empty:
+            return []
+        df = df.astype({"total": float})
         rewards = {x.id: x for x in Reward.objects.all()}
         df["name"] = df["reward_id"].map(lambda x: rewards[x].name if not pd.isna(x) else None)
         df["base_price"] = df["reward_id"].map(lambda x: rewards[x].amount if not pd.isna(x) else None).astype(float)
@@ -58,7 +61,10 @@ class CampaignView(DetailView):
             .annotate(is_anonymous=ExpressionWrapper(Q(name="Anonymous"), output_field=models.BooleanField()))
             .values("is_anonymous")
             .annotate(count=Count("id"), total=Sum("amount"))
-        ).astype({"total": float})
+        )
+        if df.empty:
+            return []
+        df = df.astype({"total": float})
         df["who"] = df["is_anonymous"].map(lambda x: "Anonymous" if x else "Other")
         df.drop(columns={"is_anonymous"}, inplace=True)
 
@@ -66,6 +72,8 @@ class CampaignView(DetailView):
 
     def get_decimal_statistics(self):
         df = pd.DataFrame.from_records(Donation.objects.filter(campaign=self.object).values("amount"))
+        if df.empty:
+            return []
 
         df["after_decimal"] = df["amount"].map(lambda x: x % 1)
 
@@ -100,6 +108,8 @@ class CampaignView(DetailView):
 
     def get_decimal_war_statistics(self):
         df = pd.DataFrame.from_records(Donation.objects.filter(campaign=self.object).values("amount", "completed_at"))
+        if df.empty:
+            return [], []
         df["time"] = df["completed_at"]
         df["amount_in_pennies"] = (df["amount"] * 100).astype(int)
         df.sort_values(by=["time"], inplace=True)
