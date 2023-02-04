@@ -17,6 +17,9 @@ class Campaign(models.Model):
     stream_start = models.DateTimeField(null=True, blank=True)
     stream_end = models.DateTimeField(null=True, blank=True)
 
+    stats_refresh_finished = models.DateTimeField(null=True, blank=True)
+    polls_refresh_finished = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"Campaign<{self.id}, {self.name}>"
 

@@ -1,6 +1,5 @@
 import json
 from collections import Counter
-from datetime import datetime, UTC
 
 import pandas as pd
 from django.db import models

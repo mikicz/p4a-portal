@@ -117,9 +117,11 @@
         .tab-pane {
             margin: 10px;
         }
+
         footer {
             padding: 5px;
         }
+
         #myTabContent {
             margin-bottom: 10px;
         }
@@ -169,6 +171,9 @@
             <div class="row">
                 <div class="col">
                     <h2>Reward statistics</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
                     <div style="max-width: 1500px">
                         <table id="reward-statistics"></table>
                     </div>
@@ -182,6 +187,9 @@
             <div class="row">
                 <div class="col">
                     <h2>Anonymous statistics</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
                     <div style="max-width: 500px; margin: 0 auto;">
                         <table id="anonymous-statistics"></table>
                     </div>
@@ -195,6 +203,9 @@
             <div class="row">
                 <div class="col">
                     <h2>Decimal value statistics</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
                     <div style="max-width: 500px; margin: 0 auto">
                         <table id="decimal-statistics"></table>
                     </div>
@@ -205,7 +216,12 @@
     <div class="tab-pane fade" id="decimal-war-tab-pane" role="tabpanel" aria-labelledby="decimal-war-tab" tabindex="0">
         <div class="container">
             <div class="row">
-                <div class="col"><h2>Decimal wars</h2></div>
+                <div class="col">
+                    <h2>Decimal wars</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
+                </div>
             </div>
             <div class="row">
                 <div class="col">
@@ -230,6 +246,9 @@
             <div class="row">
                 <div class="col">
                     <h2>Polls</h2>
+                    {% if object.polls_refresh_finished %}
+                        <p>Data last retrieved {{ object.polls_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
                     <table class="table" style="max-width: 2000px; margin: 0 auto;">
                         <thead>
                         <tr>

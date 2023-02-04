@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import urllib.parse
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management import BaseCommand
+from django.utils import timezone
 
 from src.client import schema
 from src.client.api import get_campaign, get_rewards, get_polls, get_donations
@@ -18,8 +18,11 @@ class Command(BaseCommand):
     def import_campaign(self, campaign: Campaign):
         self.import_campaign_details(campaign)
         self.import_polls(campaign)
+        campaign.stats_refresh_finished = timezone.now()
+        campaign.save(update_fields=["stats_refresh_finished"])
         self.import_rewards(campaign)
         self.import_donations(campaign)
+
 
     def import_campaign_details(self, campaign: Campaign):
         print("Importing campaign details")
@@ -33,6 +36,8 @@ class Command(BaseCommand):
     def import_polls(self, campaign: Campaign):
         print("Importing polls details")
         polls = get_polls(campaign.id).data
+        campaign.polls_refresh_finished = timezone.now()
+        campaign.save(update_fields=["polls_refresh_finished"])
         existing_polls = {x.id: x for x in Poll.objects.all()}
         api_poll: schema.Poll
         for api_poll in polls:
