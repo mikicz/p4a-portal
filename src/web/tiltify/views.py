@@ -5,6 +5,7 @@ from datetime import datetime, UTC
 import pandas as pd
 from django.db import models
 from django.db.models import Count, Sum, ExpressionWrapper, Q
+from django.utils import timezone
 from django.views.generic import ListView, DetailView
 
 from .models import Campaign, Donation, Reward, Poll
@@ -30,6 +31,7 @@ class CampaignView(DetailView):
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
 
         data["polls"] = Poll.objects.filter(campaign=self.object).prefetch_related("option_set").order_by("created_at")
+        data["now"] = timezone.now()
 
         return data
 

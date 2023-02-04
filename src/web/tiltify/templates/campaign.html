@@ -117,6 +117,12 @@
         .tab-pane {
             margin: 10px;
         }
+        footer {
+            padding: 5px;
+        }
+        #myTabContent {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -153,9 +159,6 @@
                 type="button" role="tab" aria-controls="polls-tab-pane" aria-selected="false">
             Polls
         </button>
-    </li>
-    <li class="nav-item ms-auto" role="presentation">
-        <a class="nav-link" target="_blank" href="https://github.com/mikicz/p4a-portal">GitHub</a>
     </li>
 </ul>
 
@@ -266,6 +269,11 @@
         </div>
     </div>
 </div>
+<footer class="footer fixed-bottom text-center bg-light">
+    Generated: {{ now|date:"N j, Y, P T" }}.
+    Developed by <a href="https://twitter.com/miki_cz" target="_blank">Miki</a>,
+    source on <a target="_blank" href="https://github.com/mikicz/p4a-portal">GitHub</a>.
+</footer>
 
 </body>
 
