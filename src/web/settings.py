@@ -121,6 +121,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PROJECT_URL = "http://localhost:8000/"
 
 try:
-    pass
+    from src.web.local_settings import *  # noqa
 except ImportError:
     pass
