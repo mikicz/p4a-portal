@@ -96,6 +96,7 @@ class CampaignView(DetailView):
 
         counter = Counter()
 
+        row = None
         for row in df.itertuples():
             if row.after_decimal != current_value:
                 if current_value is not None:
@@ -103,6 +104,10 @@ class CampaignView(DetailView):
 
                 current_value = row.after_decimal
                 start = row.time
+
+        # add the last value
+        if row is not None and current_value is not None:
+            counter[current_value] += (row.time - start).total_seconds() / 60
 
         counter_df = pd.DataFrame(list(counter.items()), columns=["after_decimal", "minutes"]).sort_values(
             "minutes", ascending=False
