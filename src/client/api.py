@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -49,10 +50,14 @@ def get_polls(campaign_uuid: UUID, after: str | None = None) -> PollResponse:
     return _make_request(campaign_uuid, PollResponse, sub_url="polls", print_url=True, data=data)
 
 
-def get_donations(campaign_uuid: UUID, after: str | None = None) -> DonationResponse:
+def get_donations(
+    campaign_uuid: UUID, after: str | None = None, completed_after: datetime | None = None
+) -> DonationResponse:
     data = {"limit": 100}
     if after is not None:
         data["after"] = after
+    if completed_after is not None:
+        data["completed_after"] = completed_after.isoformat()
 
     return _make_request(campaign_uuid, DonationResponse, sub_url="donations", data=data, print_url=True)
 

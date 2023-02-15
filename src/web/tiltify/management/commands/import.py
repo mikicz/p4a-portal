@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import timedelta
 from pprint import pprint
 from uuid import UUID
 
@@ -114,20 +115,23 @@ class Command(BaseCommand):
         print("Importing donations details")
 
         to_create: list[schema.Donation] = []
-        all_imported_count = 0
+        created_total: int = 0
 
         after: str | None = None
         response: schema.DonationResponse | None
-        imported_ids = set(Donation.objects.filter(campaign=campaign).values_list("id", flat=True))
+        donation_queryset = Donation.objects.filter(campaign=campaign)
+
+        imported_ids = set(donation_queryset.values_list("uuid", flat=True))
+        completed_after = None
+        if donation_queryset.exists():
+            completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=5)
+
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
         reward_ids = set(reward_map.keys())
         while True:
-            response = get_donations(campaign.uuid, after=after)
+            response = get_donations(campaign.uuid, after=after, completed_after=completed_after)
 
-            not_imported_yet = [x for x in response.data if x.legacy_id not in imported_ids]
-            if not not_imported_yet:
-                all_imported_count += 1
-
+            not_imported_yet = [x for x in response.data if x.id not in imported_ids]
             # somehow some donations have non-existent rewards?
             to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids or x.reward_id is None])
             if os.environ.get("DEBUG", "false") == "true":
@@ -137,19 +141,26 @@ class Command(BaseCommand):
                     pprint(invalid)
             imported_ids.update([x.id for x in response.data])
 
-            if response.metadata.after is None or not response.data or all_imported_count >= 5:
+            if response.metadata.after is None or not response.data:
                 break
 
             if response.metadata.after is not None:
                 after = response.metadata.after
 
             if len(to_create) >= 10_000:
-                Donation.objects.bulk_create(
-                    [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
+                created_total += len(
+                    Donation.objects.bulk_create(
+                        [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
+                    )
                 )
                 to_create = []
 
-        Donation.objects.bulk_create([build_donation(campaign, reward_map, api_donation) for api_donation in to_create])
+        created_total += len(
+            Donation.objects.bulk_create(
+                [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
+            )
+        )
+        print("New total", donation_queryset.count(), "created", created_total)
 
 
 def build_donation(campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation):
