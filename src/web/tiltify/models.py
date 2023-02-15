@@ -49,6 +49,7 @@ class Poll(models.Model):
     active = models.BooleanField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+    test_poll = models.BooleanField(default=False)
 
     @cached_property
     def total(self) -> Decimal:

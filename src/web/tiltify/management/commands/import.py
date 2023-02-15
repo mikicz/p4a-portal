@@ -101,6 +101,7 @@ class Command(BaseCommand):
         before: int | None = None
         response: schema.DonationResponse | None
         imported_ids = set(Donation.objects.filter(campaign=campaign).values_list("id", flat=True))
+        reward_ids = set(Reward.objects.filter(campaign=campaign).values_list("id", flat=True))
         while True:
             response = get_donations(campaign.id, before=before)
 
@@ -108,7 +109,8 @@ class Command(BaseCommand):
             if not not_imported_yet:
                 all_imported_count += 1
 
-            to_create.extend(not_imported_yet)
+            # somehow some donations have non-existent rewards?
+            to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids])
             imported_ids.update([x.id for x in response.data])
 
             if response.links.prev is None or not response.data or all_imported_count >= 5:

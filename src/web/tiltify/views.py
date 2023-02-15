@@ -29,7 +29,12 @@ class CampaignView(DetailView):
         data["decimal_war_statistics"] = json.dumps(war, indent=2)
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
 
-        data["polls"] = Poll.objects.filter(campaign=self.object).prefetch_related("option_set").order_by("created_at")
+        data["polls"] = (
+            Poll.objects.filter(campaign=self.object)
+            .prefetch_related("option_set")
+            .order_by("created_at")
+            .exclude(test_poll=True)
+        )
         data["rewards"] = Reward.objects.filter(campaign=self.object).order_by("-active", "amount", "name", "id")
 
         data["now"] = timezone.now()
@@ -124,7 +129,11 @@ class CampaignView(DetailView):
         else:
             start, end = self.object.stream_start, self.object.stream_end
 
-        decimal_stream = self.get_decimal_counter(
-            df[(df["time"] >= pd.to_datetime(start)) & (df["time"] <= pd.to_datetime(end))]
-        )
-        return decimal_all.to_dict("records"), decimal_stream.to_dict("records")
+        df_stream = df[(df["time"] >= pd.to_datetime(start)) & (df["time"] <= pd.to_datetime(end))]
+        if df_stream.empty:
+            decimal_stream = []
+        else:
+            decimal_stream = self.get_decimal_counter(
+                df[(df["time"] >= pd.to_datetime(start)) & (df["time"] <= pd.to_datetime(end))]
+            ).to_dict("records")
+        return decimal_all.to_dict("records"), decimal_stream
