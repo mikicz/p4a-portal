@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import os
-import urllib.parse
 from pprint import pprint
+from uuid import UUID
 
 from django.core.management import BaseCommand
 from django.utils import timezone
@@ -14,33 +14,39 @@ from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        for campaign in Campaign.objects.filter(keep_refreshing=True):
+        for campaign in Campaign.objects.filter(keep_refreshing=True).exclude(uuid=None):
             self.import_campaign(campaign)
 
     def import_campaign(self, campaign: Campaign):
         self.import_campaign_details(campaign)
-        self.import_polls(campaign)
         self.import_rewards(campaign)
         campaign.stats_refresh_finished = timezone.now()
         self.import_donations(campaign)
         campaign.save(update_fields=["stats_refresh_finished"])
+        self.import_polls(campaign)
 
     def import_campaign_details(self, campaign: Campaign):
         print("Importing campaign details")
-        c: schema.Campaign = get_campaign(campaign.id).data
+        c: schema.Campaign = get_campaign(campaign.uuid).data
         campaign.name = c.name
         campaign.slug = c.slug
         if c.team is not None and c.team.slug is not None:
             campaign.url = f"+{c.team.slug}/{c.slug}/"
-        else:
-            campaign.url = f"@{c.user.slug}/{c.slug}/"
         campaign.description = c.description
-        campaign.supportable = c.ends_at is None or c.ends_at > timezone.now()
+        campaign.supportable = c.retired_at is None or c.retired_at > timezone.now()
         campaign.save()
 
     def import_polls(self, campaign: Campaign):
         print("Importing polls details")
-        polls = get_polls(campaign.id).data
+        polls = []
+        after = None
+        while True:
+            polls_response = get_polls(campaign.uuid, after=after)
+            polls.extend(polls_response.data)
+            if polls_response.metadata.after is None:
+                break
+            after = polls_response.metadata.after
+
         campaign.polls_refresh_finished = timezone.now()
         existing_polls = {x.id: x for x in Poll.objects.all()}
         api_poll: schema.Poll
@@ -48,7 +54,7 @@ class Command(BaseCommand):
             if api_poll.id in existing_polls:
                 poll = existing_polls[api_poll.id]
             else:
-                poll = Poll(campaign_id=campaign.id)
+                poll = Poll(campaign_id=campaign.uuid)
 
             poll.id = api_poll.id
             poll.name = api_poll.name
@@ -72,21 +78,31 @@ class Command(BaseCommand):
 
     def import_rewards(self, campaign: Campaign):
         print("Importing rewards details")
-        rewards = get_rewards(campaign.id).data
+        rewards = []
+        after = None
+        while True:
+            rewards_response = get_rewards(campaign.uuid, after=after)
+            rewards.extend(rewards_response.data)
+            if rewards_response.metadata.after is None:
+                break
+            after = rewards_response.metadata.after
+
+        Reward.objects.update(active=False)
+
         reward: schema.Reward
         for reward in rewards:
             Reward.objects.update_or_create(
-                id=reward.id,
+                id=reward.legacy_id,
                 defaults={
+                    "uuid": reward.id,
                     "campaign": campaign,
                     "name": reward.name,
-                    "amount": reward.amount,
+                    "amount": reward.amount.value,
                     "description": reward.description,
-                    "kind": reward.kind,
                     "quantity": reward.quantity,
-                    "remaining": reward.remaining,
-                    "currency": reward.currency,
-                    "active": reward.active,
+                    "remaining": reward.quantity_remaining,
+                    "currency": reward.amount.currency,
+                    "active": reward.active and (reward.quantity is None or (reward.quantity_remaining or 0) > 0),
                     "image_src": reward.image.src,
                     "image_alt": reward.image.alt,
                     "image_width": reward.image.width,
@@ -100,14 +116,15 @@ class Command(BaseCommand):
         to_create: list[schema.Donation] = []
         all_imported_count = 0
 
-        before: int | None = None
+        after: str | None = None
         response: schema.DonationResponse | None
         imported_ids = set(Donation.objects.filter(campaign=campaign).values_list("id", flat=True))
-        reward_ids = set(Reward.objects.filter(campaign=campaign).values_list("id", flat=True))
+        reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
+        reward_ids = set(reward_map.keys())
         while True:
-            response = get_donations(campaign.id, before=before)
+            response = get_donations(campaign.uuid, after=after)
 
-            not_imported_yet = [x for x in response.data if x.id not in imported_ids]
+            not_imported_yet = [x for x in response.data if x.legacy_id not in imported_ids]
             if not not_imported_yet:
                 all_imported_count += 1
 
@@ -120,19 +137,28 @@ class Command(BaseCommand):
                     pprint(invalid)
             imported_ids.update([x.id for x in response.data])
 
-            if response.links.prev is None or not response.data or all_imported_count >= 5:
+            if response.metadata.after is None or not response.data or all_imported_count >= 5:
                 break
 
-            parsed_url = urllib.parse.urlparse(response.links.prev)
-            query = dict(urllib.parse.parse_qsl(parsed_url.query))
-            before = query.get("before")
-            if before is not None:
-                before = int(before)
+            if response.metadata.after is not None:
+                after = response.metadata.after
 
             if len(to_create) >= 10_000:
                 Donation.objects.bulk_create(
-                    [Donation(campaign=campaign, **api_donation.dict()) for api_donation in to_create]
+                    [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
                 )
                 to_create = []
 
-        Donation.objects.bulk_create([Donation(campaign=campaign, **api_donation.dict()) for api_donation in to_create])
+        Donation.objects.bulk_create([build_donation(campaign, reward_map, api_donation) for api_donation in to_create])
+
+
+def build_donation(campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation):
+    return Donation(
+        uuid=api_donation.id,
+        campaign=campaign,
+        amount=api_donation.amount.value,
+        name=api_donation.donor_name,
+        comment=api_donation.donor_comment,
+        completed_at=api_donation.completed_at,
+        reward=None if api_donation.reward_id is None else reward_map[api_donation.reward_id],
+    )

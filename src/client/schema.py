@@ -1,29 +1,21 @@
 import datetime
+from uuid import UUID
 
+import pydantic
 import ujson as ujson
 from pydantic import BaseModel
 
 
-def to_camel(string: str) -> str:
-    def capitalize(word: str, i: int) -> str:
-        return word.lower() if i == 0 else word.capitalize()
-
-    return "".join(capitalize(word, i) for i, word in enumerate(string.split("_")))
-
-
 class BaseTiltifyModel(BaseModel):
     class Config:
-        alias_generator = to_camel
         json_loads = ujson.loads
         json_dumps = ujson.dumps
 
 
-class Meta(BaseTiltifyModel):
-    status: int
-
-
-class User(BaseTiltifyModel):
-    slug: str
+class Metadata(BaseTiltifyModel):
+    limit: int
+    before: str | None
+    after: str | None
 
 
 class Team(BaseTiltifyModel):
@@ -31,14 +23,13 @@ class Team(BaseTiltifyModel):
 
 
 class Campaign(BaseTiltifyModel):
-    id: int
+    id: UUID
     name: str
     slug: str
     url: str | None
     description: str
-    user: User
     team: Team | None
-    ends_at: datetime.datetime | None
+    retired_at: datetime.datetime | None
 
 
 class RewardImage(BaseTiltifyModel):
@@ -48,15 +39,20 @@ class RewardImage(BaseTiltifyModel):
     height: int
 
 
-class Reward(BaseTiltifyModel):
-    id: int
-    name: str
-    amount: float
-    description: str
-    kind: str
-    quantity: str | None
-    remaining: str | None
+class Amount(BaseTiltifyModel):
     currency: str
+    value: float
+
+
+class Reward(BaseTiltifyModel):
+    id: UUID
+    legacy_id: int
+    name: str
+    amount: Amount
+    description: str
+    # kind: str
+    quantity: int | None
+    quantity_remaining: int | None
     active: bool
     image: RewardImage
 
@@ -71,7 +67,7 @@ class Option(BaseTiltifyModel):
 
 
 class Poll(BaseTiltifyModel):
-    id: int
+    id: int = pydantic.Field(alias="legacy_id")
     name: str
     active: bool
     created_at: datetime.datetime
@@ -80,12 +76,13 @@ class Poll(BaseTiltifyModel):
 
 
 class Donation(BaseTiltifyModel):
-    id: int
-    amount: float
-    name: str
-    comment: str | None
+    id: UUID
+    legacy_id: int
+    amount: Amount
+    donor_name: str
+    donor_comment: str | None
     completed_at: datetime.datetime
-    reward_id: int | None
+    reward_id: UUID | None
 
 
 class Links(BaseTiltifyModel):
@@ -95,24 +92,22 @@ class Links(BaseTiltifyModel):
 
 
 class CampaignResponse(BaseTiltifyModel):
-    meta: Meta
     data: Campaign
 
 
 class RewardResponse(BaseTiltifyModel):
-    meta: Meta
+    metadata: Metadata
     data: list[Reward]
 
 
 class PollResponse(BaseTiltifyModel):
-    meta: Meta
+    metadata: Metadata
     data: list[Poll]
 
 
 class DonationResponse(BaseTiltifyModel):
-    meta: Meta
+    metadata: Metadata
     data: list[Donation]
-    links: Links
 
 
 if __name__ == "__main__":

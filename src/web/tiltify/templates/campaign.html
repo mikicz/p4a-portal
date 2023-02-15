@@ -194,11 +194,6 @@
                             <button type="button" id="btn-availability-false" class="btn btn-secondary">Unavailable
                             </button>
                         </div>
-                        <div class="btn-group btn-virtual">
-                            <button type="button" id="btn-virtual-all" class="btn btn-primary">All</button>
-                            <button type="button" id="btn-virtual-true" class="btn btn-secondary">Virtual</button>
-                            <button type="button" id="btn-virtual-false" class="btn btn-secondary">Physical</button>
-                        </div>
                         <div class="btn-group btn-limited">
                             <button type="button" id="btn-limited-all" class="btn btn-primary">All</button>
                             <button type="button" id="btn-limited-true" class="btn btn-secondary">Limited</button>
@@ -211,7 +206,7 @@
 
 
                     {% for reward in rewards %}
-                        <div class="card {% if reward.active %}card-active{% else %}card-inactive{% endif %} {% if reward.kind == "virtual" %}card-virtual{% else %}card-physical{% endif %} {% if reward.quantity is None %}card-unlimited{% else %}card-limited{% endif %}"
+                        <div class="card {% if reward.active %}card-active{% else %}card-inactive{% endif %} {% if reward.quantity is None %}card-unlimited{% else %}card-limited{% endif %}"
                              style="margin-bottom: 5px">
                             {% if reward.has_image %}
                                 <div class="row">
@@ -407,12 +402,6 @@
         if (card.hasClass("card-inactive") && filters.availability === true) {
             show = false;
         }
-        if (card.hasClass("card-virtual") && filters.virtual === false) {
-            show = false;
-        }
-        if (card.hasClass("card-physical") && filters.virtual === true) {
-            show = false;
-        }
         if (card.hasClass("card-limited") && filters.limited === false) {
             show = false;
         }
@@ -446,7 +435,6 @@
     $(document).ready(function () {
         $("#btn-reset-all").click(function () {
             filters.availability = null;
-            filters.virtual = null;
             filters.limited = null;
             updateButtons();
             updateCards();
@@ -459,15 +447,6 @@
         });
         $("#btn-availability-false").click(function () {
             set("availability", false)
-        });
-        $("#btn-virtual-all").click(function () {
-            set("virtual", null)
-        });
-        $("#btn-virtual-true").click(function () {
-            set("virtual", true)
-        });
-        $("#btn-virtual-false").click(function () {
-            set("virtual", false)
         });
         $("#btn-limited-all").click(function () {
             set("limited", null)

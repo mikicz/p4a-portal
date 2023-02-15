@@ -8,6 +8,7 @@ from django.utils.functional import cached_property
 
 class Campaign(models.Model):
     id = models.IntegerField(primary_key=True)
+    uuid = models.UUIDField(null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     slug = models.CharField(max_length=255, null=True, blank=True)
     url = models.CharField(max_length=255, null=True, blank=True)
@@ -25,6 +26,7 @@ class Campaign(models.Model):
 
 
 class Reward(models.Model):
+    uuid = models.UUIDField(null=True, blank=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
@@ -73,6 +75,7 @@ class Option(models.Model):
 
 
 class Donation(models.Model):
+    uuid = models.UUIDField(null=True, blank=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
     name = models.CharField(max_length=255)
