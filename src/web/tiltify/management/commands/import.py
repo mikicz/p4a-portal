@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 all_imported_count += 1
 
             # somehow some donations have non-existent rewards?
-            to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids])
+            to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids or x.reward_id is None])
             imported_ids.update([x.id for x in response.data])
 
             if response.links.prev is None or not response.data or all_imported_count >= 5:
