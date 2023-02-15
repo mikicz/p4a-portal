@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "src.web.tiltify",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
