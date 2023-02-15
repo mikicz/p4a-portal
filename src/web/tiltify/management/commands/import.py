@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import urllib.parse
+from pprint import pprint
 
 from django.core.management import BaseCommand
 from django.utils import timezone
@@ -111,6 +113,11 @@ class Command(BaseCommand):
 
             # somehow some donations have non-existent rewards?
             to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids or x.reward_id is None])
+            if os.environ.get("DEBUG", "false") == "true":
+                if invalid := [
+                    x for x in not_imported_yet if x.reward_id not in reward_ids and x.reward_id is not None
+                ]:
+                    pprint(invalid)
             imported_ids.update([x.id for x in response.data])
 
             if response.links.prev is None or not response.data or all_imported_count >= 5:
