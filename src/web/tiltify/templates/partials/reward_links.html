@@ -6,7 +6,7 @@
     {% endif %}
 </button>
 {% if reward.active and object.supportable %}
-    <a href="https://tiltify.com/{{ object.url }}donate/rewards/{{ reward.id }}" class="btn btn-sm btn-primary"
+    <a href="https://donate.tiltify.com/{{ object.url }}?rewardPublicId={{ reward.uuid }}" class="btn btn-sm btn-primary"
        target="_blank">
         Donate
     </a>
