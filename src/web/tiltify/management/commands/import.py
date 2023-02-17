@@ -55,7 +55,7 @@ class Command(BaseCommand):
             if api_poll.id in existing_polls:
                 poll = existing_polls[api_poll.id]
             else:
-                poll = Poll(campaign_id=campaign.uuid)
+                poll = Poll(campaign=campaign)
 
             poll.id = api_poll.id
             poll.name = api_poll.name
