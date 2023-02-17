@@ -60,7 +60,7 @@ class Command(BaseCommand):
             poll.id = api_poll.id
             poll.name = api_poll.name
             poll.active = api_poll.active
-            poll.created_at = api_poll.created_at
+            poll.created_at = api_poll.inserted_at
             poll.updated_at = api_poll.updated_at
             poll.save()
 
@@ -70,8 +70,8 @@ class Command(BaseCommand):
                     poll=poll,
                     defaults={
                         "name": api_option.name,
-                        "total_amount_raised": api_option.total_amount_raised,
-                        "created_at": api_option.created_at,
+                        "total_amount_raised": api_option.amount_raised.value,
+                        "created_at": api_option.inserted_at,
                         "updated_at": api_option.updated_at,
                     },
                 )

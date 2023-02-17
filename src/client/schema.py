@@ -58,11 +58,10 @@ class Reward(BaseTiltifyModel):
 
 
 class Option(BaseTiltifyModel):
-    id: int
-    poll_id: int
+    id: int = pydantic.Field(alias="legacy_id")
     name: str
-    total_amount_raised: float
-    created_at: datetime.datetime
+    amount_raised: Amount
+    inserted_at: datetime.datetime
     updated_at: datetime.datetime
 
 
@@ -70,7 +69,7 @@ class Poll(BaseTiltifyModel):
     id: int = pydantic.Field(alias="legacy_id")
     name: str
     active: bool
-    created_at: datetime.datetime
+    inserted_at: datetime.datetime
     updated_at: datetime.datetime
     options: list[Option]
 
@@ -184,35 +183,44 @@ if __name__ == "__main__":
     print(response)
     response = PollResponse.parse_obj(
         {
-            "meta": {"status": 200},
             "data": [
                 {
-                    "id": 47,
-                    "name": "Should pineapple go on pizza?",
                     "active": True,
-                    "campaignId": 1337,
-                    "createdAt": 1498169329000,
-                    "updatedAt": 1498169329000,
+                    "amount_raised": {"currency": "USD", "value": "182.32"},
+                    "id": "b1fd4188-354b-43c5-8386-3faa753d5877",
+                    "inserted_at": "2023-02-06T18:01:06.049521Z",
+                    "legacy_id": 124257425,
+                    "name": "Learn a TikTok dance live!",
                     "options": [
                         {
-                            "id": 42,
-                            "pollId": 47,
-                            "name": "No",
-                            "totalAmountRaised": 50,
-                            "createdAt": 1498169329000,
-                            "updatedAt": 1498169329000,
+                            "amount_raised": {"currency": "USD", "value": "182.32"},
+                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
+                            "inserted_at": "2023-02-06T18:01:06.181453Z",
+                            "legacy_id": 571780308,
+                            "name": "Learn a TikTok dance live!",
+                            "updated_at": "2023-02-06T18:01:06.181484Z",
                         },
                         {
-                            "id": 44,
-                            "pollId": 47,
-                            "name": "Yes",
-                            "totalAmountRaised": 50,
-                            "createdAt": 1498169329000,
-                            "updatedAt": 1498169329000,
+                            "amount_raised": {"currency": "USD", "value": "182.32"},
+                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
+                            "inserted_at": "2023-02-06T18:01:06.181453Z",
+                            "legacy_id": 571780308,
+                            "name": "Learn a TikTok dance live!",
+                            "updated_at": "2023-02-06T18:01:06.181484Z",
+                        },
+                        {
+                            "amount_raised": {"currency": "USD", "value": "182.32"},
+                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
+                            "inserted_at": "2023-02-06T18:01:06.181453Z",
+                            "legacy_id": 571780308,
+                            "name": "Learn a TikTok dance live!",
+                            "updated_at": "2023-02-06T18:01:06.181484Z",
                         },
                     ],
-                },
+                    "updated_at": "2023-02-06T18:01:06.296875Z",
+                }
             ],
+            "metadata": {"after": "bGlnaHQgwd==", "before": None, "limit": 10},
         }
     )
     print(response)
