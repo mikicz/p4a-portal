@@ -328,14 +328,16 @@
                 <div class="col">
                     <h2>Polls</h2>
                     {% if object.polls_refresh_finished %}
-                        <p>Data last retrieved {{ object.polls_refresh_finished|date:"N j, Y, P T" }}</p>
+                        <p>
+                            Data last retrieved {{ object.polls_refresh_finished|date:"N j, Y, P T" }}.
+                            This section shows the last available results from the API, not the final amount at time of closing.
+                        </p>
                     {% endif %}
                     <table class="table" style="max-width: 2000px; margin: 0 auto;">
                         <thead>
                         <tr>
                             <th>Question</th>
                             <th style="min-width: 190px">Created (UTC)</th>
-                            <th style="min-width: 190px">Finished (UTC)</th>
                             <th style="min-width: 120px">Total raised</th>
                             <th style="min-width: 250px">Option</th>
                             <th style="min-width: 120px">Raised</th>
@@ -346,7 +348,6 @@
                             <tr>
                                 <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
                                 <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
-                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.updated_at }}</td>
                                 <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
                                 {% for option in poll.option_set.all %}
                                     {% if not forloop.first %}
