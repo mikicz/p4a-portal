@@ -85,6 +85,10 @@ class Donation(BaseTiltifyModel):
     reward_id: UUID | None
 
 
+class DonationList(BaseTiltifyModel):
+    donations: list[Donation]
+
+
 class Links(BaseTiltifyModel):
     prev: str | None
     next: str | None

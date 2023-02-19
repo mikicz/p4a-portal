@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.core.management import BaseCommand
 
 from src.client import schema
@@ -16,6 +18,7 @@ class Command(BaseCommand):
 
     def import_donations(self, campaign: Campaign):
         missing: list[schema.Donation] = []
+        all_donations: list[schema.Donation] = []
         after: str | None = None
         response: schema.DonationResponse | None
 
@@ -24,6 +27,7 @@ class Command(BaseCommand):
 
         while True:
             response = get_donations(campaign.uuid, after=after)
+            all_donations.extend(response.data)
             chunk_missing = [x for x in response.data if x.id not in imported_ids]
             missing.extend(chunk_missing)
 
@@ -41,4 +45,4 @@ class Command(BaseCommand):
         )
         print("New total", donation_queryset.count(), "created", created_total)
 
-        print("missing", len(missing))
+        Path("all_donations.json").write_text(schema.DonationList(donations=all_donations).json())

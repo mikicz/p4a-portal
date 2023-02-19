@@ -163,3 +163,4 @@ src/web/local_settings.py
 staticfiles
 
 comments.txt
+all_donations.json
