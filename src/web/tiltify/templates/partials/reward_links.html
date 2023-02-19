@@ -5,6 +5,11 @@
         Unlimited
     {% endif %}
 </button>
+{% if reward.kind is not None %}
+    <button class="btn btn-sm btn-secondary">
+        {{ reward.kind|title }}
+    </button>
+{% endif %}
 {% if reward.active and object.supportable %}
     <a href="https://donate.tiltify.com/{{ object.url }}?rewardPublicId={{ reward.uuid }}" class="btn btn-sm btn-primary"
        target="_blank">
