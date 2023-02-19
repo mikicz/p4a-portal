@@ -6,8 +6,8 @@ from django.core.management import BaseCommand
 from django.utils import timezone
 
 from src.client import schema
-from src.client.api import get_campaign, get_donations
-from src.web.tiltify.management.import_utils import build_donation, import_rewards
+from src.client.api import get_donations
+from src.web.tiltify.management.import_utils import build_donation, import_campaign_details, import_rewards
 from src.web.tiltify.models import Campaign, Donation, Reward
 
 
@@ -17,22 +17,11 @@ class Command(BaseCommand):
             self.import_campaign(campaign)
 
     def import_campaign(self, campaign: Campaign):
-        self.import_campaign_details(campaign)
+        import_campaign_details(campaign)
         import_rewards(campaign)
         campaign.stats_refresh_finished = timezone.now()
         self.import_donations(campaign)
         campaign.save(update_fields=["stats_refresh_finished"])
-
-    def import_campaign_details(self, campaign: Campaign):
-        print("Importing campaign details")
-        c: schema.Campaign = get_campaign(campaign.uuid).data
-        campaign.name = c.name
-        campaign.slug = c.slug
-        if c.team is not None and c.team.slug is not None:
-            campaign.url = f"+{c.team.slug}/{c.slug}/"
-        campaign.description = c.description
-        campaign.supportable = c.retired_at is None or c.retired_at > timezone.now()
-        campaign.save()
 
     def import_donations(self, campaign: Campaign):
         print("Importing donations details")

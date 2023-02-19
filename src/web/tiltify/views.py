@@ -138,7 +138,10 @@ class CampaignView(DetailView):
         return counter_df[:10].reset_index(drop=True)
 
     def get_decimal_war_statistics(self):
-        df = pd.DataFrame.from_records(Donation.objects.filter(campaign=self.object).values("amount", "completed_at"))
+        qs = Donation.objects.filter(campaign=self.object)
+        if self.object.retired_at is not None:
+            qs = qs.filter(completed_at__lte=self.object.retired_at)
+        df = pd.DataFrame.from_records(qs.values("amount", "completed_at"))
         if df.empty:
             return [], []
         df["time"] = df["completed_at"]

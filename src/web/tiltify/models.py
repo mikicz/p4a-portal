@@ -16,6 +16,8 @@ class Campaign(models.Model):
     description = models.TextField(null=True, blank=True)
     stream_start = models.DateTimeField(null=True, blank=True)
     stream_end = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    retired_at = models.DateTimeField(null=True, blank=True)
 
     stats_refresh_finished = models.DateTimeField(null=True, blank=True)
     polls_refresh_finished = models.DateTimeField(null=True, blank=True)

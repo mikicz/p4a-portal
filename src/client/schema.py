@@ -29,6 +29,7 @@ class Campaign(BaseTiltifyModel):
     url: str | None
     description: str
     team: Team | None
+    published_at: datetime.datetime | None
     retired_at: datetime.datetime | None
 
 

@@ -1,7 +1,9 @@
 from uuid import UUID
 
+from django.utils import timezone
+
 from src.client import schema
-from src.client.api import get_rewards
+from src.client.api import get_campaign, get_rewards
 from src.web.tiltify.models import Campaign, Donation, Reward
 
 
@@ -60,3 +62,17 @@ def import_rewards(campaign: Campaign):
                 "image_height": reward.image.height,
             },
         )
+
+
+def import_campaign_details(campaign: Campaign):
+    print("Importing campaign details")
+    c: schema.Campaign = get_campaign(campaign.uuid).data
+    campaign.name = c.name
+    campaign.slug = c.slug
+    if c.team is not None and c.team.slug is not None:
+        campaign.url = f"+{c.team.slug}/{c.slug}/"
+    campaign.description = c.description
+    campaign.supportable = c.retired_at is None or c.retired_at > timezone.now()
+    campaign.published_at = c.published_at
+    campaign.retired_at = c.retired_at
+    campaign.save()
