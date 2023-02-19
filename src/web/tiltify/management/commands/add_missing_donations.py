@@ -17,6 +17,7 @@ class Command(BaseCommand):
         self.import_donations(campaign)
 
     def import_donations(self, campaign: Campaign):
+        # TODO: merge with fix donations, make run regularly
         missing: list[schema.Donation] = []
         all_donations: list[schema.Donation] = []
         after: str | None = None

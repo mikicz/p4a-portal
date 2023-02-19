@@ -12,6 +12,7 @@ class Command(BaseCommand):
         parser.add_argument("--preview", action="store_true", default=False)
 
     def handle(self, *args, **options):
+        # FIXME: make this run regularly?
         campaign = Campaign.objects.get(id=options["id"])
         all_donations = schema.DonationList.parse_file("all_donations.json").donations
         all_donations_ids = {x.id for x in all_donations}
@@ -45,6 +46,7 @@ class Command(BaseCommand):
                 )
                 donation.delete()
 
+            # FIXME: prevent this from happening entirely
             for x in duplicate_ids:
                 donations = list(Donation.objects.filter(uuid=x))
                 for y in donations[1:]:

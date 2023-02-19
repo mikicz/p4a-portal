@@ -24,6 +24,7 @@ class Command(BaseCommand):
         campaign.save(update_fields=["stats_refresh_finished"])
 
     def import_donations(self, campaign: Campaign):
+        # TODO: rename to import_donations
         print("Importing donations details")
 
         to_create: list[schema.Donation] = []
