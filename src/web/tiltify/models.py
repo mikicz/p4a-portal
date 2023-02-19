@@ -28,8 +28,8 @@ class Campaign(models.Model):
 class Reward(models.Model):
     uuid = models.UUIDField(null=True, blank=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    amount = models.DecimalField(decimal_places=2, max_digits=20)
+    name = models.CharField(max_length=255, null=True)
+    amount = models.DecimalField(decimal_places=2, max_digits=20, null=True)
     description = models.TextField(null=True)
     kind = models.CharField(max_length=255, null=True)
     quantity = models.IntegerField(null=True)
@@ -40,6 +40,7 @@ class Reward(models.Model):
     image_alt = models.CharField(max_length=255, null=True)
     image_width = models.IntegerField(null=True)
     image_height = models.IntegerField(null=True)
+    missing = models.BooleanField(default=False)
 
     def has_image(self):
         return self.image_src != "https://assets.tiltify.com/assets/default-reward.png"

@@ -35,11 +35,31 @@ class CampaignView(DetailView):
             .order_by("created_at")
             .exclude(test_poll=True)
         )
-        data["rewards"] = Reward.objects.filter(campaign=self.object).order_by("-active", "amount", "name", "id")
+        data["rewards"] = (
+            Reward.objects.filter(campaign=self.object)
+            .exclude(missing=True)
+            .order_by("-active", "amount", "name", "id")
+        )
 
         data["now"] = timezone.now()
+        data["total"] = Donation.objects.filter(campaign=self.object).aggregate(amount=Sum("amount"))["amount"]
 
         return data
+
+    def get_reward_name(self, reward_id, rewards):
+        if pd.isna(reward_id):
+            return None
+
+        if rewards[reward_id].missing:
+            return "(???? missing from API)"
+
+        return rewards[reward_id].name
+
+    def get_reward_base_price(self, reward_id, rewards):
+        if pd.isna(reward_id) or rewards[reward_id].missing:
+            return None
+
+        return rewards[reward_id].amount
 
     def get_reward_statistics(self):
         df = pd.DataFrame.from_records(
@@ -51,8 +71,8 @@ class CampaignView(DetailView):
             return []
         df = df.astype({"total": float})
         rewards = {x.id: x for x in Reward.objects.all()}
-        df["name"] = df["reward_id"].map(lambda x: rewards[x].name if not pd.isna(x) else None)
-        df["base_price"] = df["reward_id"].map(lambda x: rewards[x].amount if not pd.isna(x) else None).astype(float)
+        df["name"] = df["reward_id"].map(lambda x: self.get_reward_name(x, rewards))
+        df["base_price"] = df["reward_id"].map(lambda x: self.get_reward_base_price(x, rewards)).astype(float)
         df["raised_over_base"] = df["total"] - (df["count"] * df["base_price"])
         total = df["total"].sum()
         df["percentage_of_total"] = (df["total"] / total) * 100

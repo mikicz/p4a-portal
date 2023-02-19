@@ -293,14 +293,15 @@
     </div>
     <div class="tab-pane fade" id="decimal-war-tab-pane" role="tabpanel" aria-labelledby="decimal-war-tab" tabindex="0">
         <div class="container">
-            Temporarily hidden because I'm missing some data, and therefore this section is inaccurate.
-            {% comment %}
             <div class="row">
                 <div class="col">
                     <h2>Decimal war</h2>
                     {% if object.stats_refresh_finished %}
                         <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
                     {% endif %}
+                    <p>
+                        The total on Tiltify is currently: {{ total }}.
+                    </p>
                 </div>
             </div>
             <div class="row">
@@ -317,7 +318,6 @@
                     </div>
                 </div>
             </div>
-            {% endcomment %}
         </div>
 
 

@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-import os
 from datetime import timedelta
-from pprint import pprint
-from uuid import UUID
 
 from django.core.management import BaseCommand
 from django.utils import timezone
 
 from src.client import schema
 from src.client.api import get_campaign, get_donations, get_polls, get_rewards
+from src.web.tiltify.management.import_utils import build_donation
 from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
@@ -127,18 +125,11 @@ class Command(BaseCommand):
             completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=5)
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
-        reward_ids = set(reward_map.keys())
         while True:
             response = get_donations(campaign.uuid, after=after, completed_after=completed_after)
 
             not_imported_yet = [x for x in response.data if x.id not in imported_ids]
-            # somehow some donations have non-existent rewards?
-            to_create.extend([x for x in not_imported_yet if x.reward_id in reward_ids or x.reward_id is None])
-            if os.environ.get("DEBUG", "false") == "true":
-                if invalid := [
-                    x for x in not_imported_yet if x.reward_id not in reward_ids and x.reward_id is not None
-                ]:
-                    pprint(invalid)
+            to_create.extend(not_imported_yet)
             imported_ids.update([x.id for x in response.data])
 
             if response.metadata.after is None or not response.data:
@@ -161,15 +152,3 @@ class Command(BaseCommand):
             )
         )
         print("New total", donation_queryset.count(), "created", created_total)
-
-
-def build_donation(campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation):
-    return Donation(
-        uuid=api_donation.id,
-        campaign=campaign,
-        amount=api_donation.amount.value,
-        name=api_donation.donor_name,
-        comment=api_donation.donor_comment,
-        completed_at=api_donation.completed_at,
-        reward=None if api_donation.reward_id is None else reward_map[api_donation.reward_id],
-    )
