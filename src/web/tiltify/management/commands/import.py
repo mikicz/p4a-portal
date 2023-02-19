@@ -36,7 +36,7 @@ class Command(BaseCommand):
         imported_ids = set(donation_queryset.values_list("uuid", flat=True))
         completed_after = None
         if donation_queryset.exists():
-            completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=5)
+            completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=30)
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
         while True:
