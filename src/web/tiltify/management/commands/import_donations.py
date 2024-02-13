@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from src.client import schema
 from src.client.api import get_donations
-from src.web.tiltify.management.import_utils import build_donation, import_campaign_details, import_rewards
+from src.web.tiltify.management.import_utils import build_donation, import_rewards
 from src.web.tiltify.models import Campaign, Donation, Reward
 
 
@@ -17,14 +17,12 @@ class Command(BaseCommand):
             self.import_campaign(campaign)
 
     def import_campaign(self, campaign: Campaign):
-        import_campaign_details(campaign)
         import_rewards(campaign)
         campaign.stats_refresh_finished = timezone.now()
         self.import_donations(campaign)
         campaign.save(update_fields=["stats_refresh_finished"])
 
     def import_donations(self, campaign: Campaign):
-        # TODO: rename to import_donations
         print("Importing donations details")
 
         to_create: list[schema.Donation] = []
