@@ -281,9 +281,10 @@
             <div class="row">
                 <div class="col">
                     <h2>Decimal value statistics</h2>
-                    {# TODO: add explanation of this #}
                     {% if object.stats_refresh_finished %}
-                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                        <p>
+                            <abbr title="More donations could have been made since!">Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</abbr>
+                        </p>
                     {% endif %}
                     <div style="max-width: 500px; margin: 0 auto">
                         <table id="decimal-statistics"></table>
@@ -300,9 +301,8 @@
                     {% if object.stats_refresh_finished %}
                         <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
                     {% endif %}
-                    {# TODO: add explanation of this, add caveat giving yanked donations #}
                     <p>
-                        The total on Tiltify is currently: {{ total }}.
+                        <abbr title="This value may not be accurate as some donations are revoked after being made.">The total on Tiltify is currently: {{ total }}.</abbr>
                     </p>
                 </div>
             </div>
