@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
+from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward, RewardClaim
 
 
 @admin.register(Campaign)
@@ -26,4 +26,9 @@ class PollAdmin(admin.ModelAdmin):
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
-    list_display = ("id", "reward", "amount", "name", "comment", "completed_at")
+    list_display = ("id", "amount", "name", "comment", "completed_at")
+
+
+@admin.register(RewardClaim)
+class RewardClaimAdmin(admin.ModelAdmin):
+    list_display = ("id", "quantity", "reward", "donation")

@@ -2,7 +2,7 @@ from django.core.management import BaseCommand
 
 from src.client import schema
 from src.client.api import get_donations
-from src.web.tiltify.management.import_utils import build_donation
+from src.web.tiltify.management.import_utils import create_donations_and_reward_claims
 from src.web.tiltify.models import Campaign, Donation, Reward
 
 
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         response: schema.DonationResponse | None
 
         donation_queryset = Donation.objects.filter(campaign=campaign)
-        imported_ids = set(donation_queryset.values_list("uuid", flat=True))
+        imported_ids = set(donation_queryset.values_list("id", flat=True))
 
         while True:
             response = get_donations(campaign.uuid, after=after)
@@ -37,12 +37,23 @@ class Command(BaseCommand):
                 after = response.metadata.after
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
-        created_total = len(
-            Donation.objects.bulk_create(
-                [build_donation(campaign, reward_map, api_donation) for api_donation in missing]
-            )
+
+        created_total, created_claims = create_donations_and_reward_claims(
+            campaign=campaign,
+            reward_map=reward_map,
+            to_create=missing,
+            currently_donations_created=0,
+            currently_reward_claims_created=0,
         )
-        print("New total", donation_queryset.count(), "created", created_total)
+
+        print(
+            "New total",
+            donation_queryset.count(),
+            "created donations",
+            created_total,
+            "created claims",
+            created_claims,
+        )
 
         return all_donations
 
@@ -53,7 +64,7 @@ class Command(BaseCommand):
             Donation.objects.filter(
                 campaign=campaign,
                 completed_at__lte=max([x.completed_at for x in all_donations]),
-            ).values_list("uuid", flat=True)
+            ).values_list("id", flat=True)
         )
         donation_ids_set = set(donation_ids_list)
 
@@ -64,13 +75,12 @@ class Command(BaseCommand):
         print("Extra in DB", len(donation_ids_set - all_donations_ids))
 
         for x in donation_ids_set - all_donations_ids:
-            donation = Donation.objects.get(uuid=x)
+            donation = Donation.objects.get(id=x)
             print(
-                donation.uuid,
+                donation.id,
                 donation.amount,
                 donation.name,
                 donation.comment,
                 donation.completed_at,
-                donation.reward,
             )
             donation.delete()

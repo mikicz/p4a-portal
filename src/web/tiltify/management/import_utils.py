@@ -4,29 +4,67 @@ from django.utils import timezone
 
 from src.client import schema
 from src.client.api import get_campaign, get_rewards
-from src.web.tiltify.models import Campaign, Donation, Reward
+from src.web.tiltify.models import Campaign, Donation, Reward, RewardClaim
 
 
-def build_donation(campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation):
-    reward = None
-    if api_donation.reward_id is not None:
+def build_donation(
+    campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation
+) -> tuple[Donation, list[RewardClaim]]:
+    reward_claims = []
+
+    for reward_claim in api_donation.reward_claims:
         try:
-            reward = reward_map[api_donation.reward_id]
+            reward = reward_map[reward_claim.reward_id]
         except KeyError:
             reward, _ = Reward.objects.get_or_create(
-                uuid=api_donation.reward_id, campaign=campaign, defaults={"missing": True}
+                uuid=reward_claim.reward_id,
+                campaign=campaign,
+                defaults={"missing": True},
             )
-            reward_map[api_donation.reward_id] = reward
+            reward_map[reward_claim.reward_id] = reward
+        reward_claims.append(
+            RewardClaim(
+                id=reward_claim.id,
+                reward=reward,
+                quantity=reward_claim.quantity,
+                donation_id=api_donation.id,
+            )
+        )
 
-    return Donation(
-        uuid=api_donation.id,
+    donation = Donation(
+        id=api_donation.id,
         campaign=campaign,
         amount=api_donation.amount.value,
         name=api_donation.donor_name,
         comment=api_donation.donor_comment,
         completed_at=api_donation.completed_at,
-        reward=reward,
     )
+
+    return donation, reward_claims
+
+
+def create_donations_and_reward_claims(
+    *,
+    campaign: Campaign,
+    to_create: list[schema.Donation],
+    reward_map: dict[UUID, Reward],
+    currently_donations_created: int,
+    currently_reward_claims_created: int,
+) -> tuple[int, int]:
+    donations_to_create = []
+    reward_claims_to_create = []
+
+    for api_donation in to_create:
+        x, y = build_donation(campaign, reward_map, api_donation)
+        donations_to_create.append(x)
+        reward_claims_to_create.extend(y)
+
+    currently_donations_created += len(Donation.objects.bulk_create(donations_to_create, ignore_conflicts=True))
+    currently_reward_claims_created += len(
+        RewardClaim.objects.bulk_create(reward_claims_to_create, ignore_conflicts=True)
+    )
+
+    return currently_donations_created, currently_reward_claims_created
 
 
 def import_rewards(campaign: Campaign):

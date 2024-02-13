@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from src.client import schema
 from src.client.api import get_donations
-from src.web.tiltify.management.import_utils import build_donation, import_rewards
+from src.web.tiltify.management.import_utils import create_donations_and_reward_claims, import_rewards
 from src.web.tiltify.models import Campaign, Donation, Reward
 
 
@@ -27,17 +27,19 @@ class Command(BaseCommand):
 
         to_create: list[schema.Donation] = []
         created_total: int = 0
+        created_claims: int = 0
 
         after: str | None = None
         response: schema.DonationResponse | None
         donation_queryset = Donation.objects.filter(campaign=campaign)
 
-        imported_ids = set(donation_queryset.values_list("uuid", flat=True))
+        imported_ids = set(donation_queryset.values_list("id", flat=True))
         completed_after = None
         if donation_queryset.exists():
             completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=30)
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
+
         while True:
             response = get_donations(campaign.uuid, after=after, completed_after=completed_after)
 
@@ -52,18 +54,27 @@ class Command(BaseCommand):
                 after = response.metadata.after
 
             if len(to_create) >= 10_000:
-                created_total += len(
-                    Donation.objects.bulk_create(
-                        [build_donation(campaign, reward_map, api_donation) for api_donation in to_create],
-                        ignore_conflicts=True,
-                    )
+                created_total, created_claims = create_donations_and_reward_claims(
+                    campaign=campaign,
+                    reward_map=reward_map,
+                    to_create=to_create,
+                    currently_donations_created=created_total,
+                    currently_reward_claims_created=created_claims,
                 )
                 to_create = []
 
-        created_total += len(
-            Donation.objects.bulk_create(
-                [build_donation(campaign, reward_map, api_donation) for api_donation in to_create],
-                ignore_conflicts=True,
-            )
+        created_total, created_claims = create_donations_and_reward_claims(
+            campaign=campaign,
+            reward_map=reward_map,
+            to_create=to_create,
+            currently_donations_created=created_total,
+            currently_reward_claims_created=created_claims,
         )
-        print("New total", donation_queryset.count(), "created", created_total)
+        print(
+            "New total",
+            donation_queryset.count(),
+            "created donations",
+            created_total,
+            "created reward claims",
+            created_claims,
+        )

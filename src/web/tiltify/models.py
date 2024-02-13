@@ -47,6 +47,9 @@ class Reward(models.Model):
     def has_image(self):
         return self.image_src != "https://assets.tiltify.com/assets/default-reward.png"
 
+    def __str__(self):
+        return self.name or self.uuid
+
 
 class Poll(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
@@ -78,10 +81,16 @@ class Option(models.Model):
 
 
 class Donation(models.Model):
-    uuid = models.UUIDField(unique=True)
+    id = models.UUIDField(primary_key=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
     name = models.CharField(max_length=255)
     comment = models.TextField(null=True, blank=True)
     completed_at = models.DateTimeField()
-    reward = models.ForeignKey(Reward, on_delete=models.CASCADE, null=True, blank=True)
+
+
+class RewardClaim(models.Model):
+    id = models.UUIDField(primary_key=True)
+    reward = models.ForeignKey(Reward, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    donation = models.ForeignKey(Donation, on_delete=models.CASCADE)
