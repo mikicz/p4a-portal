@@ -7,7 +7,7 @@ from django.db.models import Count, ExpressionWrapper, Q, Sum
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
-from .models import Campaign, Donation, Poll, Reward
+from .models import Campaign, Donation, Poll, Reward, RewardClaim
 
 
 class CampaignsView(ListView):
@@ -62,21 +62,41 @@ class CampaignView(DetailView):
         return rewards[reward_id].amount
 
     def get_reward_statistics(self):
-        df = pd.DataFrame.from_records(
+        no_reward_stats = (
             Donation.objects.filter(campaign=self.object)
+            .filter(rewardclaim__isnull=True)
+            .aggregate(count=Count("id"), total=Sum("amount"))
+        )
+        df = pd.DataFrame.from_records(
+            RewardClaim.objects.filter(donation__campaign=self.object)
             .values("reward_id")
-            .annotate(count=Count("id"), total=Sum("amount"))
+            .annotate(count=Sum("quantity"))
         )
         if df.empty:
             return []
+
+        df = pd.concat(
+            [
+                df,
+                pd.DataFrame(
+                    [
+                        {
+                            "reward_id": None,
+                            "count": no_reward_stats["count"],
+                            "total": no_reward_stats["total"],
+                        }
+                    ]
+                ),
+            ]
+        )
+
         df = df.astype({"total": float})
         rewards = {x.id: x for x in Reward.objects.all()}
         df["name"] = df["reward_id"].map(lambda x: self.get_reward_name(x, rewards))
         df["base_price"] = df["reward_id"].map(lambda x: self.get_reward_base_price(x, rewards)).astype(float)
-        df["raised_over_base"] = df["total"] - (df["count"] * df["base_price"])
+        df["total"] = df["total"].fillna(df["base_price"] * df["count"])
         total = df["total"].sum()
         df["percentage_of_total"] = (df["total"] / total) * 100
-        df["average"] = df["total"] / df["count"]
         df.sort_values(by=["total", "count", "reward_id"], inplace=True, ascending=False)
         df.drop(columns={"reward_id"}, inplace=True)
 

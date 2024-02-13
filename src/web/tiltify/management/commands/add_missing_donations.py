@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.management import BaseCommand
 
 from src.client import schema
@@ -25,7 +27,9 @@ class Command(BaseCommand):
         imported_ids = set(donation_queryset.values_list("id", flat=True))
 
         while True:
-            response = get_donations(campaign.uuid, after=after)
+            response = get_donations(
+                campaign.uuid, after=after, completed_after=campaign.published_at - timedelta(days=1)
+            )
             all_donations.extend(response.data)
             chunk_missing = [x for x in response.data if x.id not in imported_ids]
             missing.extend(chunk_missing)

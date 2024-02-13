@@ -24,9 +24,18 @@ class PollAdmin(admin.ModelAdmin):
     inlines = [OptionInline]
 
 
+class RewardClaimInline(admin.TabularInline):
+    list_display = ("quantity", "reward")
+    model = RewardClaim
+
+
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
-    list_display = ("id", "amount", "name", "comment", "completed_at")
+    list_display = ("id", "amount", "name", "comment", "completed_at", "has_rewards")
+    inlines = [RewardClaimInline]
+
+    def has_rewards(self, obj):
+        return obj.rewardclaim_set.exists()
 
 
 @admin.register(RewardClaim)
