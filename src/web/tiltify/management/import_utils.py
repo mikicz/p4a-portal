@@ -12,7 +12,7 @@ def build_donation(
 ) -> tuple[Donation, list[RewardClaim]]:
     reward_claims = []
 
-    for reward_claim in api_donation.reward_claims:
+    for reward_claim in api_donation.reward_claims or []:
         try:
             reward = reward_map[reward_claim.reward_id]
         except KeyError:
