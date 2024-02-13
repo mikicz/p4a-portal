@@ -78,7 +78,7 @@ class Option(models.Model):
 
 
 class Donation(models.Model):
-    uuid = models.UUIDField(null=True, blank=True)  # FIXME: make this non-nullable and unique
+    uuid = models.UUIDField(unique=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=20)
     name = models.CharField(max_length=255)

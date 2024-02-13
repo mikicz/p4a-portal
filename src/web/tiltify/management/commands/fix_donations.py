@@ -1,5 +1,3 @@
-from collections import Counter
-
 from django.core.management import BaseCommand
 
 from src.client import schema
@@ -19,7 +17,8 @@ class Command(BaseCommand):
 
         donation_ids_list = list(
             Donation.objects.filter(
-                campaign=campaign, completed_at__lte=max([x.completed_at for x in all_donations])
+                campaign=campaign,
+                completed_at__lte=max([x.completed_at for x in all_donations]),
             ).values_list("uuid", flat=True)
         )
         donation_ids_set = set(donation_ids_list)
@@ -29,9 +28,6 @@ class Command(BaseCommand):
         print("Overlap", len(donation_ids_set & all_donations_ids))
         print("Missing in DB", len(all_donations_ids - donation_ids_set))
         print("Extra in DB", len(donation_ids_set - all_donations_ids))
-
-        duplicate_ids = {k for k, v in Counter(donation_ids_list).items() if v > 1}
-        print("Duplicate", len(duplicate_ids))
 
         if not options["preview"]:
             for x in donation_ids_set - all_donations_ids:
@@ -45,9 +41,3 @@ class Command(BaseCommand):
                     donation.reward,
                 )
                 donation.delete()
-
-            # FIXME: prevent this from happening entirely
-            for x in duplicate_ids:
-                donations = list(Donation.objects.filter(uuid=x))
-                for y in donations[1:]:
-                    y.delete()

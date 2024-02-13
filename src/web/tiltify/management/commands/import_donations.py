@@ -54,14 +54,16 @@ class Command(BaseCommand):
             if len(to_create) >= 10_000:
                 created_total += len(
                     Donation.objects.bulk_create(
-                        [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
+                        [build_donation(campaign, reward_map, api_donation) for api_donation in to_create],
+                        ignore_conflicts=True,
                     )
                 )
                 to_create = []
 
         created_total += len(
             Donation.objects.bulk_create(
-                [build_donation(campaign, reward_map, api_donation) for api_donation in to_create]
+                [build_donation(campaign, reward_map, api_donation) for api_donation in to_create],
+                ignore_conflicts=True,
             )
         )
         print("New total", donation_queryset.count(), "created", created_total)
