@@ -34,6 +34,7 @@
         let decimalStatistics = {{ decimal_statistics|safe }};
         let decimalWarStatistics = {{ decimal_war_statistics|safe }};
         let decimalWarStreamStatistics = {{ decimal_war_stream_statistics|safe }};
+        let donationStatistics = {{ donation_statistics|safe }};
         let moneyFormatterParams = {"symbol": "$"};
 
         function percentage(cell, formatterParams, onRendered) {
@@ -47,17 +48,29 @@
                 height: 800,
                 columns: [
                     {"title": "Reward name", "field": "name"},
-                    {"title": "Count", "field": "count", "width": 75},
-                    {
-                        "title": "Total raised", "field": "total", "formatter": "money",
-                        "formatterParams": moneyFormatterParams, "width": 150
-                    },
-                    {
-                        "title": "Percentage of total", "field": "percentage_of_total", "formatter": percentage,
-                        "width": 175
-                    },
                     {
                         "title": "Base price", "field": "base_price", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 150
+                    },
+                    {"title": "Count", "field": "count", "width": 75},
+                    {
+                        "title": "Total raised (minimum)", "field": "total", "formatter": "money",
+                        "formatterParams": moneyFormatterParams, "width": 250
+                    },
+                    {
+                        "title": "Approx percentage of total", "field": "percentage_of_total", "formatter": percentage,
+                        "width": 175
+                    },
+                ]
+            });
+            $("#donation-statistics").tabulator({
+                data: donationStatistics,
+                layout: "fitColumns",
+                columns: [
+                    {"title": "Rewards in donation", "field": "rewards"},
+                    {"title": "Count", "field": "count", "width": 75},
+                    {
+                        "title": "Raised", "field": "total", "formatter": "money",
                         "formatterParams": moneyFormatterParams, "width": 150
                     },
                 ]
@@ -134,6 +147,13 @@
                 type="button"
                 role="tab" aria-controls="rewards-tab-pane" aria-selected="false">
             Reward statistics
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="donation-tab" data-bs-toggle="tab" data-bs-target="#donation-tab-pane"
+                type="button"
+                role="tab" aria-controls="donation-tab-pane" aria-selected="false">
+            Donation statistics
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -246,6 +266,23 @@
                     {% endif %}
                     <div style="max-width: 1500px">
                         <table id="reward-statistics"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="tab-pane fade" id="donation-tab-pane" role="tabpanel" aria-labelledby="donation-tab"
+         tabindex="0">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h2>Donation statistics</h2>
+                    {% if object.stats_refresh_finished %}
+                        <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
+                    {% endif %}
+                    <div style="max-width: 500px; margin: 0 auto;">
+                        <table id="donation-statistics"></table>
                     </div>
                 </div>
             </div>

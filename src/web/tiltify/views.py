@@ -23,6 +23,7 @@ class CampaignView(DetailView):
         data = super().get_context_data(**kwargs)
 
         data["reward_statistics"] = json.dumps(self.get_reward_statistics(), indent=2)
+        data["donation_statistics"] = json.dumps(self.get_donation_statistics(), indent=2)
         data["anonymous_statistics"] = json.dumps(self.get_anonymous_statistics(), indent=2)
         data["decimal_statistics"] = json.dumps(self.get_decimal_statistics(), indent=2)
         war, war_stream = self.get_decimal_war_statistics()
@@ -60,6 +61,19 @@ class CampaignView(DetailView):
             return None
 
         return rewards[reward_id].amount
+
+    def get_donation_statistics(self):
+        df = pd.DataFrame.from_records(
+            Donation.objects.filter(campaign=self.object)
+            .annotate(rewards=Count("rewardclaim"))
+            .values("id", "rewards", "amount")
+        )
+        if df.empty:
+            return []
+        df = df.groupby(by=["rewards"]).agg(total=("amount", "sum"), count=("id", "count")).reset_index()
+        df["total"] = df["total"].astype(float)
+        df.sort_values(by=["count", "rewards"], inplace=True, ascending=False)
+        return df.to_dict("records")
 
     def get_reward_statistics(self):
         no_reward_stats = (
