@@ -63,9 +63,9 @@ def get_donations(
 
 
 if __name__ == "__main__":
-    id_ = 155357
-    print(get_campaign(id_))
-    print(get_rewards(id_))
-    print(get_polls(id_))
+    id_ = "dd353610-992e-4050-bb34-0d1f7ee6e0f3"
+    # print(get_campaign(id_))
+    # print(get_rewards(id_))
+    # print(get_polls(id_))
     print(get_donations(id_))
-    print(get_donations(id_, before=5706171))
+    # print(get_donations(id_, before=5706171))

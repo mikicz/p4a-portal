@@ -75,6 +75,12 @@ class Poll(BaseTiltifyModel):
     options: list[Option]
 
 
+class RewardClaim(BaseTiltifyModel):
+    id: UUID
+    quantity: int
+    reward_id: UUID | None
+
+
 class Donation(BaseTiltifyModel):
     id: UUID
     legacy_id: int
@@ -82,7 +88,7 @@ class Donation(BaseTiltifyModel):
     donor_name: str
     donor_comment: str | None
     completed_at: datetime.datetime
-    reward_id: UUID | None
+    reward_claims: list[RewardClaim] | None
 
 
 class DonationList(BaseTiltifyModel):
@@ -112,144 +118,3 @@ class PollResponse(BaseTiltifyModel):
 class DonationResponse(BaseTiltifyModel):
     metadata: Metadata
     data: list[Donation]
-
-
-if __name__ == "__main__":
-    response = CampaignResponse.parse_obj(
-        {
-            "meta": {"status": 200},
-            "data": {
-                "id": 1,
-                "name": "My Awesome Campaign",
-                "slug": "my-awesome-campaign",
-                "url": "/@username/my-awesome-campaign",
-                "startsAt": 1493355600000,
-                "endsAt": 1496206800000,
-                "description": "My awesome weekend campaign.",
-                "avatar": {"src": "https://asdf.cloudfront.net/asdf.jpg", "alt": "", "width": 200, "height": 200},
-                "causeId": 17,
-                "fundraisingEventId": 39,
-                "fundraiserGoalAmount": 10000,
-                "originalGoalAmount": 5000,
-                "amountRaised": 3402.00,
-                "supportingAmountRaised": 8923.00,
-                "totalAmountRaised": 12325.00,
-                "supportable": True,
-                "status": "published",
-                "user": {
-                    "id": 1,
-                    "username": "UserName",
-                    "slug": "username",
-                    "url": "/@username",
-                    "avatar": {"src": "https://asdf.cloudfront.net/asdf.jpg", "alt": "", "width": 200, "height": 200},
-                },
-                "team": {
-                    "id": 1,
-                    "username": "Team Name",
-                    "slug": "teamslug",
-                    "url": "/+teamslug",
-                    "avatar": {"src": "https://asdf.cloudfront.net/asdf.jpg", "alt": "", "width": 200, "height": 200},
-                },
-                "livestream": {"type": "twitch", "channel": "tiltify"},
-            },
-        }
-    )
-    print(response)
-    response = RewardResponse.parse_obj(
-        {
-            "meta": {"status": 200},
-            "data": [
-                {
-                    "id": 1,
-                    "name": "Fingerstache vhs paleo tattooed echo cold-pressed.",
-                    "description": "Chuck Norris can access the DB from the UI.",
-                    "amount": 43,
-                    "kind": "virtual",
-                    "quantity": None,
-                    "remaining": None,
-                    "fairMarketValue": 88,
-                    "currency": "USD",
-                    "shippingAddressRequired": False,
-                    "shippingNote": None,
-                    "image": {
-                        "src": "",
-                        "alt": "Chuck Norris can access the DB from the UI.",
-                        "width": 270,
-                        "height": 176,
-                    },
-                    "active": True,
-                    "startsAt": 0,
-                    "createdAt": 1498169329000,
-                    "updatedAt": 1498249889000,
-                }
-            ],
-        }
-    )
-    print(response)
-    response = PollResponse.parse_obj(
-        {
-            "data": [
-                {
-                    "active": True,
-                    "amount_raised": {"currency": "USD", "value": "182.32"},
-                    "id": "b1fd4188-354b-43c5-8386-3faa753d5877",
-                    "inserted_at": "2023-02-06T18:01:06.049521Z",
-                    "legacy_id": 124257425,
-                    "name": "Learn a TikTok dance live!",
-                    "options": [
-                        {
-                            "amount_raised": {"currency": "USD", "value": "182.32"},
-                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
-                            "inserted_at": "2023-02-06T18:01:06.181453Z",
-                            "legacy_id": 571780308,
-                            "name": "Learn a TikTok dance live!",
-                            "updated_at": "2023-02-06T18:01:06.181484Z",
-                        },
-                        {
-                            "amount_raised": {"currency": "USD", "value": "182.32"},
-                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
-                            "inserted_at": "2023-02-06T18:01:06.181453Z",
-                            "legacy_id": 571780308,
-                            "name": "Learn a TikTok dance live!",
-                            "updated_at": "2023-02-06T18:01:06.181484Z",
-                        },
-                        {
-                            "amount_raised": {"currency": "USD", "value": "182.32"},
-                            "id": "3d895da9-b96f-4cb5-9ab0-504a0c1bf0df",
-                            "inserted_at": "2023-02-06T18:01:06.181453Z",
-                            "legacy_id": 571780308,
-                            "name": "Learn a TikTok dance live!",
-                            "updated_at": "2023-02-06T18:01:06.181484Z",
-                        },
-                    ],
-                    "updated_at": "2023-02-06T18:01:06.296875Z",
-                }
-            ],
-            "metadata": {"after": "bGlnaHQgwd==", "before": None, "limit": 10},
-        }
-    )
-    print(response)
-    response = DonationResponse.parse_obj(
-        {
-            "meta": {"status": 200},
-            "data": [
-                {
-                    "id": 21347,
-                    "amount": 4.20,
-                    "name": "Yoda",
-                    "comment": "Judge me by my size, do you?",
-                    "completedAt": 1490328000000,
-                    "rewardId": 12,
-                },
-                {
-                    "id": 21342,
-                    "amount": 1.00,
-                    "name": "Me",
-                    "comment": "This is an easy Game",
-                    "completedAt": 1490327800000,
-                },
-            ],
-            "links": {"prev": "", "next": "", "self": ""},
-        }
-    )
-    print(response)
