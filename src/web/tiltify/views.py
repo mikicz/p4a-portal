@@ -24,6 +24,7 @@ class CampaignView(DetailView):
 
         data["reward_statistics"] = json.dumps(self.get_reward_statistics(), indent=2)
         data["donation_statistics"] = json.dumps(self.get_donation_statistics(), indent=2)
+        data["reward_combinations"] = json.dumps(self.get_reward_combinations(), indent=2)
         data["anonymous_statistics"] = json.dumps(self.get_anonymous_statistics(), indent=2)
         data["decimal_statistics"] = json.dumps(self.get_decimal_statistics(), indent=2)
         war, war_stream = self.get_decimal_war_statistics()
@@ -74,6 +75,35 @@ class CampaignView(DetailView):
         df["total"] = df["total"].astype(float)
         df.sort_values(by=["count", "rewards"], inplace=True, ascending=False)
         return df.to_dict("records")
+
+    def get_reward_combinations(self):
+        df = pd.DataFrame.from_records(
+            RewardClaim.objects.filter(donation__campaign=self.object).values("donation_id", "reward_id")
+        )
+
+        if df.empty:
+            return []
+
+        grouped_donations = df.groupby("donation_id")["reward_id"].apply(frozenset).reset_index()
+        grouped_donations = grouped_donations[grouped_donations["reward_id"].map(len) > 1]
+        if grouped_donations.empty:
+            return []
+
+        combinations = (
+            grouped_donations.groupby(["reward_id"])
+            .count()
+            .reset_index()
+            .rename(columns={"donation_id": "count"})
+            .sort_values("count", ascending=False)
+        )
+        rewards = dict(Reward.objects.filter(campaign=self.object).values_list("id", "name"))
+
+        def get_names(reward_ids):
+            return ", ".join(sorted([rewards[x] or "(???? missing from API)" for x in reward_ids]))
+
+        combinations["reward_names"] = combinations["reward_id"].map(get_names)
+
+        return combinations.drop(columns=["reward_id"]).to_dict("records")
 
     def get_reward_statistics(self):
         no_reward_stats = (

@@ -35,6 +35,7 @@
         let decimalWarStatistics = {{ decimal_war_statistics|safe }};
         let decimalWarStreamStatistics = {{ decimal_war_stream_statistics|safe }};
         let donationStatistics = {{ donation_statistics|safe }};
+        let rewardCombinations = {{ reward_combinations|safe }};
         let moneyFormatterParams = {"symbol": "$"};
 
         function percentage(cell, formatterParams, onRendered) {
@@ -73,6 +74,15 @@
                         "title": "Raised", "field": "total", "formatter": "money",
                         "formatterParams": moneyFormatterParams, "width": 150
                     },
+                ]
+            });
+            $("#reward-combinations").tabulator({
+                data: rewardCombinations,
+                layout: "fitColumns",
+                height: 500,
+                columns: [
+                    {"title": "Rewards", "field": "reward_names"},
+                    {"title": "Count", "field": "count", "width": 75},
                 ]
             });
             $("#decimal-statistics").tabulator({
@@ -283,6 +293,11 @@
                     {% endif %}
                     <div style="max-width: 500px; margin: 0 auto;">
                         <table id="donation-statistics"></table>
+                    </div>
+                    <hr>
+                    <h2>Reward combinations</h2>
+                    <div style="max-width: 1500px; margin: 0 auto;">
+                        <table id="reward-combinations"></table>
                     </div>
                 </div>
             </div>
