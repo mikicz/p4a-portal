@@ -87,15 +87,17 @@ class Command(BaseCommand):
 
         updated_missing_poll = 0
         for donation_id in missing_poll_ids & {x.id for x in all_donations if x.poll_id is not None}:
-            if all_donations_map[donation_id].poll_id not in polls:
+            if all_donations_map[donation_id].poll_id in polls:
                 Donation.objects.filter(id=donation_id).update(poll_id=all_donations_map[donation_id].poll_id)
-            updated_missing_poll += 1
+                updated_missing_poll += 1
 
         updated_missing_poll_option = 0
         for donation_id in missing_option_ids & {x.id for x in all_donations if x.poll_option_id is not None}:
-            if all_donations_map[donation_id].poll_option_id not in options:
-                Donation.objects.filter(id=donation_id).update(poll_id=all_donations_map[donation_id].poll_option_id)
-            updated_missing_poll_option += 1
+            if all_donations_map[donation_id].poll_option_id in options:
+                Donation.objects.filter(id=donation_id).update(
+                    poll_option_id=all_donations_map[donation_id].poll_option_id
+                )
+                updated_missing_poll_option += 1
 
         print("In all donations", len(all_donations_map.keys()))
         print("In database", len(donation_ids_set))
