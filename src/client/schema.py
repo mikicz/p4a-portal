@@ -1,7 +1,6 @@
 import datetime
 from uuid import UUID
 
-import pydantic
 import ujson as ujson
 from pydantic import BaseModel
 
@@ -63,7 +62,7 @@ class Reward(BaseTiltifyModel):
 
 
 class Option(BaseTiltifyModel):
-    id: int = pydantic.Field(alias="legacy_id")
+    id: UUID
     name: str
     amount_raised: Amount
     inserted_at: datetime.datetime
@@ -71,7 +70,7 @@ class Option(BaseTiltifyModel):
 
 
 class Poll(BaseTiltifyModel):
-    id: int = pydantic.Field(alias="legacy_id")
+    id: UUID
     name: str
     active: bool
     inserted_at: datetime.datetime

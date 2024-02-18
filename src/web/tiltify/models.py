@@ -57,6 +57,7 @@ class Reward(models.Model):
 
 
 class Poll(models.Model):
+    id = models.UUIDField(primary_key=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     active = models.BooleanField()
@@ -78,6 +79,7 @@ class Poll(models.Model):
 
 
 class Option(models.Model):
+    id = models.UUIDField(primary_key=True)
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     total_amount_raised = models.DecimalField(decimal_places=2, max_digits=20)
