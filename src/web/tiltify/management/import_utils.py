@@ -50,7 +50,7 @@ def build_donation(
         comment=api_donation.donor_comment,
         completed_at=api_donation.completed_at,
         poll_id=poll_id,
-        poll_option=option_id,
+        poll_option_id=option_id,
     )
 
     return donation, reward_claims
