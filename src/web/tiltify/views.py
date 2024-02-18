@@ -297,10 +297,10 @@ class CampaignView(DetailView):
             .order_by("poll__created_at", "created_at")
         )
         options["votes"] = options["id"].map(
-            lambda x: donations_to_polls_dict[(x, True)] + donations_to_polls_dict[(x, False)]
+            lambda x: donations_to_polls_dict.get((x, True), 0) + donations_to_polls_dict.get((x, False), 0)
         )
-        options["votes_with_reward"] = options["id"].map(lambda x: donations_to_polls_dict[(x, True)])
-        options["votes_without_reward"] = options["id"].map(lambda x: donations_to_polls_dict[(x, False)])
+        options["votes_with_reward"] = options["id"].map(lambda x: donations_to_polls_dict.get((x, True), 0))
+        options["votes_without_reward"] = options["id"].map(lambda x: donations_to_polls_dict.get((x, False), 0))
         winning_options_amount = {}
         winning_options_id = {}
         for row in options.itertuples():
