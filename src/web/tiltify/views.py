@@ -281,7 +281,8 @@ class CampaignView(DetailView):
                 donations_to_polls_dict[(poll_option_id, False)] = 0
 
         options = pd.DataFrame.from_records(
-            Option.objects.filter(poll__test_poll=False, poll__campaign=self.object).values(
+            Option.objects.filter(poll__test_poll=False, poll__campaign=self.object)
+            .values(
                 "id",
                 "name",
                 "total_amount_raised",
@@ -293,6 +294,7 @@ class CampaignView(DetailView):
                 "poll__created_at",
                 "poll__updated_at",
             )
+            .order_by("poll__created_at", "created_at")
         )
         options["votes"] = options["id"].map(
             lambda x: donations_to_polls_dict[(x, True)] + donations_to_polls_dict[(x, False)]
