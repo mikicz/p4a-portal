@@ -393,25 +393,36 @@
                             <th style="min-width: 120px">Total raised</th>
                             <th style="min-width: 250px">Option</th>
                             <th style="min-width: 120px">Raised</th>
+                            <th>Votes</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for poll in polls %}
+                        {% for poll in polls_v2 %}
                             <tr>
-                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.name }}</td>
-                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.created_at }}</td>
-                                <td rowspan="{{ poll.option_set.all|length }}">{{ poll.total }}</td>
-                                {% for option in poll.option_set.all %}
+                                <td rowspan="{{ poll.options|length }}">{{ poll.poll_name }}</td>
+                                <td rowspan="{{ poll.options|length }}">{{ poll.poll_created_at }}</td>
+                                <td rowspan="{{ poll.options|length }}">{{ poll.total }}</td>
+                                {% for option in poll.options %}
                                     {% if not forloop.first %}
                                         <tr>
                                     {% endif %}
-                                <td>{% if poll.winning == option %}<strong>{% endif %}{{ option.name }}
-                                    {% if poll.winning == option %}
-                                        </strong>{% endif %}</td>
-                                <td>{% if poll.winning == option %}<strong>{% endif %}
+                                <td>
+                                    {% if option.winning %}<strong>{% endif %}
+                                    {{ option.name }}
+                                    {% if option.winning %}</strong>{% endif %}
+                                </td>
+                                <td>
+                                    {% if option.winning %}<strong>{% endif %}
                                     ${{ option.total_amount_raised|floatformat:2|intcomma }}
-                                    {% if poll.winning == option %}
-                                        </strong>{% endif %}</td>
+                                    {% if option.winning %}</strong>{% endif %}
+                                </td>
+                                <td>
+                                    {% if option.winning %}<strong>{% endif %}
+                                    <abbr title="Out of these votes, {{ option.votes_with_reward }} got rewards, {{ option.votes_without_reward }} did not.">
+                                        {{  option.votes }}
+                                    </abbr>
+                                    {% if option.winning %}</strong>{% endif %}
+                                </td>
                                 </tr>
                                 {% endfor %}
                         {% endfor %}

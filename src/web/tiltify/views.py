@@ -1,6 +1,8 @@
 import datetime
 import json
 from collections import Counter
+from decimal import Decimal
+from uuid import UUID
 
 import pandas as pd
 from django.db import models
@@ -8,7 +10,7 @@ from django.db.models import Count, ExpressionWrapper, Max, Min, Q, Sum
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
-from .models import Campaign, Donation, Poll, Reward, RewardClaim
+from .models import Campaign, Donation, Option, Reward, RewardClaim
 
 
 class CampaignsView(ListView):
@@ -32,12 +34,7 @@ class CampaignView(DetailView):
         data["decimal_war_statistics"] = json.dumps(war, indent=2)
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
 
-        data["polls"] = (
-            Poll.objects.filter(campaign=self.object)
-            .prefetch_related("option_set")
-            .order_by("created_at")
-            .exclude(test_poll=True)
-        )
+        data["polls_v2"] = self.get_polls()
         data["rewards"] = (
             Reward.objects.filter(campaign=self.object)
             .exclude(missing=True)
@@ -255,3 +252,82 @@ class CampaignView(DetailView):
                 df[(df["time"] >= pd.to_datetime(start)) & (df["time"] <= pd.to_datetime(end))]
             ).to_dict("records")
         return decimal_all.to_dict("records"), decimal_stream
+
+    def get_polls(self):
+        donations = pd.DataFrame(
+            Donation.objects.filter(poll_option_id__isnull=False, campaign=self.object)
+            .annotate(reward_count=Count("rewardclaim"))
+            .values("poll_option_id", "reward_count")
+        )
+        if donations.empty:
+            return None
+        donations["has_reward"] = donations["reward_count"] > 0
+
+        donations_to_polls_df_indexed = donations.groupby(["poll_option_id", "has_reward"]).count()
+        donations_to_polls_df = donations_to_polls_df_indexed.reset_index()
+        donations_to_polls_dict: dict[tuple[UUID, bool], int] = {}
+        for poll_option_id in donations_to_polls_df.reset_index()["poll_option_id"].unique():
+            try:
+                donations_to_polls_dict[(poll_option_id, True)] = donations_to_polls_df_indexed.loc[
+                    (poll_option_id, True)
+                ]["reward_count"]
+            except KeyError:
+                donations_to_polls_dict[(poll_option_id, True)] = 0
+            try:
+                donations_to_polls_dict[(poll_option_id, False)] = donations_to_polls_df_indexed.loc[
+                    (poll_option_id, False)
+                ]["reward_count"]
+            except KeyError:
+                donations_to_polls_dict[(poll_option_id, False)] = 0
+
+        options = pd.DataFrame.from_records(
+            Option.objects.filter(poll__test_poll=False, poll__campaign=self.object).values(
+                "id",
+                "name",
+                "total_amount_raised",
+                "created_at",
+                "updated_at",
+                "poll__id",
+                "poll__name",
+                "poll__active",
+                "poll__created_at",
+                "poll__updated_at",
+            )
+        )
+        options["votes"] = options["id"].map(
+            lambda x: donations_to_polls_dict[(x, True)] + donations_to_polls_dict[(x, False)]
+        )
+        options["votes_with_reward"] = options["id"].map(lambda x: donations_to_polls_dict[(x, True)])
+        options["votes_without_reward"] = options["id"].map(lambda x: donations_to_polls_dict[(x, False)])
+        winning_options_amount = {}
+        winning_options_id = {}
+        for row in options.itertuples():
+            winning_options_id.setdefault(row.poll__id, row.id)
+            winning_options_amount.setdefault(row.poll__id, row.total_amount_raised)
+
+            if row.total_amount_raised > winning_options_amount[row.poll__id]:
+                winning_options_id[row.poll__id] = row.id
+                winning_options_amount[row.poll__id] = row.total_amount_raised
+
+        winning_options_ids = set(winning_options_id.values())
+
+        options["winning"] = options["id"].map(lambda x: x in winning_options_ids)
+
+        final_data = {}
+        for row in options.itertuples():  # type: Any
+            final_data.setdefault(
+                row.poll__id,
+                {
+                    "poll_id": row.poll__id,
+                    "poll_name": row.poll__name,
+                    "poll_active": row.poll__active,
+                    "poll_created_at": row.poll__created_at,
+                    "poll_updated_at": row.poll__updated_at,
+                    "total": Decimal(0),
+                    "options": [],
+                },
+            )
+            final_data[row.poll__id]["options"].append(row)
+            final_data[row.poll__id]["total"] += row.total_amount_raised
+
+        return list(final_data.values())
