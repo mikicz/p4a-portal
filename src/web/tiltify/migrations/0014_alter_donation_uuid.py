@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0013_campaign_published_at_campaign_retired_at"),
     ]

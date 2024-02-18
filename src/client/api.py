@@ -19,7 +19,7 @@ def _make_request(
     data: dict[str, Any] | None = None,
     print_url: bool = False,
 ):
-    full_url = f"https://v5api.tiltify.com/api/public/team_campaigns/{str(campaign_uuid)}/" + (sub_url or "")
+    full_url = f"https://v5api.tiltify.com/api/public/team_campaigns/{campaign_uuid!s}/" + (sub_url or "")
     if print_url:
         print(full_url, data)
 

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tiltify", "0015_remove_donation_reward_remove_donation_uuid_and_more"),
     ]

@@ -1,3 +1,4 @@
+import contextlib
 import os
 from pathlib import Path
 
@@ -121,7 +122,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PROJECT_URL = "http://localhost:8000/"
 
-try:
+with contextlib.suppress(ImportError):
     from src.web.local_settings import *  # noqa
-except ImportError:
-    pass
