@@ -95,6 +95,9 @@ class Donation(models.Model):
     comment = models.TextField(null=True, blank=True)
     completed_at = models.DateTimeField()
 
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
+    poll_option = models.ForeignKey(Option, on_delete=models.CASCADE, null=True, blank=True)
+
 
 class RewardClaim(models.Model):
     id = models.UUIDField(primary_key=True)

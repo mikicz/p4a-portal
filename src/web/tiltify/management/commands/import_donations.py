@@ -8,7 +8,7 @@ from django.utils import timezone
 from src.client import schema
 from src.client.api import get_donations
 from src.web.tiltify.management.import_utils import create_donations_and_reward_claims, import_rewards
-from src.web.tiltify.models import Campaign, Donation, Reward
+from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
 class Command(BaseCommand):
@@ -40,6 +40,9 @@ class Command(BaseCommand):
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
 
+        polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
+        options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
+
         while True:
             response = get_donations(campaign.uuid, after=after, completed_after=completed_after)
 
@@ -60,6 +63,8 @@ class Command(BaseCommand):
                     to_create=to_create,
                     currently_donations_created=created_total,
                     currently_reward_claims_created=created_claims,
+                    polls=polls,
+                    options=options,
                 )
                 to_create = []
 
@@ -69,6 +74,8 @@ class Command(BaseCommand):
             to_create=to_create,
             currently_donations_created=created_total,
             currently_reward_claims_created=created_claims,
+            polls=polls,
+            options=options,
         )
         print(
             "New total",

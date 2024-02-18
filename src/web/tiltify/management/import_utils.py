@@ -8,7 +8,11 @@ from src.web.tiltify.models import Campaign, Donation, Reward, RewardClaim
 
 
 def build_donation(
-    campaign: Campaign, reward_map: dict[UUID, Reward], api_donation: schema.Donation
+    campaign: Campaign,
+    reward_map: dict[UUID, Reward],
+    api_donation: schema.Donation,
+    polls: set[UUID],
+    options: set[UUID],
 ) -> tuple[Donation, list[RewardClaim]]:
     reward_claims = []
 
@@ -31,6 +35,13 @@ def build_donation(
             )
         )
 
+    poll_id = None if api_donation.poll_id is None or api_donation.poll_id not in polls else api_donation.poll_id
+    option_id = (
+        None
+        if api_donation.poll_option_id is None or api_donation.poll_option_id not in options
+        else api_donation.poll_option_id
+    )
+
     donation = Donation(
         id=api_donation.id,
         campaign=campaign,
@@ -38,6 +49,8 @@ def build_donation(
         name=api_donation.donor_name,
         comment=api_donation.donor_comment,
         completed_at=api_donation.completed_at,
+        poll_id=poll_id,
+        poll_option=option_id,
     )
 
     return donation, reward_claims
@@ -50,12 +63,14 @@ def create_donations_and_reward_claims(
     reward_map: dict[UUID, Reward],
     currently_donations_created: int,
     currently_reward_claims_created: int,
+    polls: set[UUID],
+    options: set[UUID],
 ) -> tuple[int, int]:
     donations_to_create = []
     reward_claims_to_create = []
 
     for api_donation in to_create:
-        x, y = build_donation(campaign, reward_map, api_donation)
+        x, y = build_donation(campaign, reward_map, api_donation, polls, options)
         donations_to_create.append(x)
         reward_claims_to_create.extend(y)
 

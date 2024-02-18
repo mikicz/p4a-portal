@@ -92,6 +92,8 @@ class Donation(BaseTiltifyModel):
     donor_comment: str | None
     completed_at: datetime.datetime
     reward_claims: list[RewardClaim] | None
+    poll_id: UUID | None
+    poll_option_id: UUID | None
 
 
 class DonationList(BaseTiltifyModel):

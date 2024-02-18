@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 from src.client import schema
 from src.client.api import get_donations
 from src.web.tiltify.management.import_utils import create_donations_and_reward_claims
-from src.web.tiltify.models import Campaign, Donation, Reward
+from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
 class Command(BaseCommand):
@@ -42,12 +42,17 @@ class Command(BaseCommand):
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
 
+        polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
+        options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
+
         created_total, created_claims = create_donations_and_reward_claims(
             campaign=campaign,
             reward_map=reward_map,
             to_create=missing,
             currently_donations_created=0,
             currently_reward_claims_created=0,
+            polls=polls,
+            options=options,
         )
 
         print(
@@ -62,7 +67,12 @@ class Command(BaseCommand):
         return all_donations
 
     def fix_donations(self, campaign: Campaign, all_donations: list[schema.Donation]):
-        all_donations_ids = {x.id for x in all_donations}
+        all_donations_map = {x.id: x for x in all_donations}
+
+        missing_poll_ids = set(Donation.objects.filter(campaign=campaign, poll_id=None).values_list("id", flat=True))
+        missing_option_ids = set(
+            Donation.objects.filter(campaign=campaign, poll_option_id=None).values_list("id", flat=True)
+        )
 
         donation_ids_list = list(
             Donation.objects.filter(
@@ -72,13 +82,30 @@ class Command(BaseCommand):
         )
         donation_ids_set = set(donation_ids_list)
 
-        print("In all donations", len(all_donations_ids))
-        print("In database", len(donation_ids_set))
-        print("Overlap", len(donation_ids_set & all_donations_ids))
-        print("Missing in DB", len(all_donations_ids - donation_ids_set))
-        print("Extra in DB", len(donation_ids_set - all_donations_ids))
+        polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
+        options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
-        for x in donation_ids_set - all_donations_ids:
+        updated_missing_poll = 0
+        for donation_id in missing_poll_ids & {x.id for x in all_donations if x.poll_id is not None}:
+            if all_donations_map[donation_id].poll_id not in polls:
+                Donation.objects.filter(id=donation_id).update(poll_id=all_donations_map[donation_id].poll_id)
+            updated_missing_poll += 1
+
+        updated_missing_poll_option = 0
+        for donation_id in missing_option_ids & {x.id for x in all_donations if x.poll_option_id is not None}:
+            if all_donations_map[donation_id].poll_option_id not in options:
+                Donation.objects.filter(id=donation_id).update(poll_id=all_donations_map[donation_id].poll_option_id)
+            updated_missing_poll_option += 1
+
+        print("In all donations", len(all_donations_map.keys()))
+        print("In database", len(donation_ids_set))
+        print("Overlap", len(donation_ids_set & all_donations_map.keys()))
+        print("Missing in DB", len(all_donations_map.keys() - donation_ids_set))
+        print("Extra in DB", len(donation_ids_set - all_donations_map.keys()))
+        print("Updated missing poll_id", updated_missing_poll)
+        print("Updated missing poll_option_id", updated_missing_poll_option)
+
+        for x in donation_ids_set - all_donations_map.keys():
             donation = Donation.objects.get(id=x)
             print(
                 donation.id,
