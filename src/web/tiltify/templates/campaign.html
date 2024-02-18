@@ -62,6 +62,11 @@
                         "title": "Approx percentage of total", "field": "percentage_of_total", "formatter": percentage,
                         "width": 175
                     },
+                    {
+                        "title": "Sold out in",
+                        "field": "sold_out_in",
+                        "width": 100
+                    }
                 ]
             });
             $("#donation-statistics").tabulator({
@@ -274,6 +279,7 @@
                     {% if object.stats_refresh_finished %}
                         <p>Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}</p>
                     {% endif %}
+                    <p>The "sold out in" time is approximated from first and last donation time with that reward.</p>
                     <div style="max-width: 1500px">
                         <table id="reward-statistics"></table>
                     </div>

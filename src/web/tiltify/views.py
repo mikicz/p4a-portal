@@ -1,9 +1,10 @@
+import datetime
 import json
 from collections import Counter
 
 import pandas as pd
 from django.db import models
-from django.db.models import Count, ExpressionWrapper, Q, Sum
+from django.db.models import Count, ExpressionWrapper, Max, Min, Q, Sum
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
 
@@ -136,11 +137,36 @@ class CampaignView(DetailView):
 
         df = df.astype({"total": float})
         rewards = {x.id: x for x in Reward.objects.all()}
+
+        reward_start = {}
+        reward_end = {}
+        for reward_id, reward in rewards.items():
+            if reward.remaining != 0:
+                continue
+
+            reward_start[reward_id] = reward.starts_at
+            if reward_start[reward_id] is None:
+                reward_start[reward_id] = Donation.objects.filter(rewardclaim__reward=reward).aggregate(
+                    min=Min("completed_at")
+                )["min"]
+            reward_end[reward_id] = Donation.objects.filter(rewardclaim__reward=reward).aggregate(
+                max=Max("completed_at")
+            )["max"]
+
+        def sold_out_in(reward_id_) -> str | None:
+            if reward_id_ not in reward_start:
+                return None
+            seconds = (reward_end[reward_id_] - reward_start[reward_id_]).total_seconds()
+            return str(datetime.timedelta(seconds=round(seconds)))
+
         df["name"] = df["reward_id"].map(lambda x: self.get_reward_name(x, rewards))
         df["base_price"] = df["reward_id"].map(lambda x: self.get_reward_base_price(x, rewards)).astype(float)
         df["total"] = df["total"].fillna(df["base_price"] * df["count"])
         total = df["total"].sum()
         df["percentage_of_total"] = (df["total"] / total) * 100
+
+        df["sold_out_in"] = df["reward_id"].map(sold_out_in)
+
         df.sort_values(by=["total", "count", "reward_id"], inplace=True, ascending=False)
         df.drop(columns={"reward_id"}, inplace=True)
 
