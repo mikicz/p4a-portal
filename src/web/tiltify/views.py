@@ -141,7 +141,7 @@ class CampaignView(DetailView):
         reward_start = {}
         reward_end = {}
         for reward_id, reward in rewards.items():
-            if reward.remaining != 0:
+            if reward.active:
                 continue
 
             reward_start[reward_id] = reward.starts_at
