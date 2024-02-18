@@ -44,6 +44,11 @@ class Reward(models.Model):
     image_height = models.IntegerField(null=True)
     missing = models.BooleanField(default=False)
 
+    inserted_at = models.DateTimeField(default=None, null=True, blank=True)
+    starts_at = models.DateTimeField(default=None, null=True, blank=True)
+    ends_at = models.DateTimeField(default=None, null=True, blank=True)
+    updated_at = models.DateTimeField(default=None, null=True, blank=True)
+
     def has_image(self):
         return self.image_src != "https://assets.tiltify.com/assets/default-reward.png"
 

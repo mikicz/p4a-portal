@@ -56,6 +56,10 @@ class Reward(BaseTiltifyModel):
     quantity_remaining: int | None
     active: bool
     image: RewardImage
+    inserted_at: datetime.datetime | None
+    starts_at: datetime.datetime | None
+    ends_at: datetime.datetime | None
+    updated_at: datetime.datetime | None
 
 
 class Option(BaseTiltifyModel):

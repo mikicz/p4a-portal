@@ -98,6 +98,10 @@ def import_rewards(campaign: Campaign):
                 "image_alt": reward.image.alt,
                 "image_width": reward.image.width,
                 "image_height": reward.image.height,
+                "inserted_at": reward.inserted_at,
+                "starts_at": reward.starts_at,
+                "ends_at": reward.ends_at,
+                "updated_at": reward.updated_at,
             },
         )
 
