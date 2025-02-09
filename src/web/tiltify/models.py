@@ -53,7 +53,7 @@ class Reward(models.Model):
         return self.image_src != "https://assets.tiltify.com/assets/default-reward.png"
 
     def __str__(self):
-        return self.name or self.uuid
+        return self.name or str(self.uuid)
 
 
 class Poll(models.Model):
@@ -77,6 +77,9 @@ class Poll(models.Model):
                 return option
         return None
 
+    def __str__(self):
+        return f"Poll<{self.id}, {self.name}>"
+
 
 class Option(models.Model):
     id = models.UUIDField(primary_key=True)
@@ -85,6 +88,9 @@ class Option(models.Model):
     total_amount_raised = models.DecimalField(decimal_places=2, max_digits=20)
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Option<{self.id}, {self.name}>"
 
 
 class Donation(models.Model):
@@ -98,9 +104,15 @@ class Donation(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
     poll_option = models.ForeignKey(Option, on_delete=models.CASCADE, null=True, blank=True)
 
+    def __str__(self):
+        return f"Donation<{self.id}, {self.name}>"
+
 
 class RewardClaim(models.Model):
     id = models.UUIDField(primary_key=True)
     reward = models.ForeignKey(Reward, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"RewardClaim<{self.id}>"
