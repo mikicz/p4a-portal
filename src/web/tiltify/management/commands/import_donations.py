@@ -6,7 +6,7 @@ from django.core.management import BaseCommand
 from django.utils import timezone
 
 from src.client import schema
-from src.client.api import get_donations
+from src.client.api import get_authenticated_session, get_donations
 from src.web.tiltify.management.import_utils import create_donations_and_reward_claims, import_rewards
 from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
@@ -43,30 +43,31 @@ class Command(BaseCommand):
         polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
         options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
-        while True:
-            response = get_donations(campaign.uuid, after=after, completed_after=completed_after)
+        with get_authenticated_session() as session:
+            while True:
+                response = get_donations(session, campaign.uuid, after=after, completed_after=completed_after)
 
-            not_imported_yet = [x for x in response.data if x.id not in imported_ids]
-            to_create.extend(not_imported_yet)
-            imported_ids.update([x.id for x in response.data])
+                not_imported_yet = [x for x in response.data if x.id not in imported_ids]
+                to_create.extend(not_imported_yet)
+                imported_ids.update([x.id for x in response.data])
 
-            if response.metadata.after is None or not response.data:
-                break
+                if response.metadata.after is None or not response.data:
+                    break
 
-            if response.metadata.after is not None:
-                after = response.metadata.after
+                if response.metadata.after is not None:
+                    after = response.metadata.after
 
-            if len(to_create) >= 10_000:
-                created_total, created_claims = create_donations_and_reward_claims(
-                    campaign=campaign,
-                    reward_map=reward_map,
-                    to_create=to_create,
-                    currently_donations_created=created_total,
-                    currently_reward_claims_created=created_claims,
-                    polls=polls,
-                    options=options,
-                )
-                to_create = []
+                if len(to_create) >= 10_000:
+                    created_total, created_claims = create_donations_and_reward_claims(
+                        campaign=campaign,
+                        reward_map=reward_map,
+                        to_create=to_create,
+                        currently_donations_created=created_total,
+                        currently_reward_claims_created=created_claims,
+                        polls=polls,
+                        options=options,
+                    )
+                    to_create = []
 
         created_total, created_claims = create_donations_and_reward_claims(
             campaign=campaign,

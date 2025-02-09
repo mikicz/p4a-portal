@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.core.management import BaseCommand
 
 from src.client import schema
-from src.client.api import get_donations
+from src.client.api import get_authenticated_session, get_donations
 from src.web.tiltify.management.import_utils import create_donations_and_reward_claims
 from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
@@ -26,19 +26,20 @@ class Command(BaseCommand):
         donation_queryset = Donation.objects.filter(campaign=campaign)
         imported_ids = set(donation_queryset.values_list("id", flat=True))
 
-        while True:
-            response = get_donations(
-                campaign.uuid, after=after, completed_after=campaign.published_at - timedelta(days=1)
-            )
-            all_donations.extend(response.data)
-            chunk_missing = [x for x in response.data if x.id not in imported_ids]
-            missing.extend(chunk_missing)
+        with get_authenticated_session() as session:
+            while True:
+                response = get_donations(
+                    session, campaign.uuid, after=after, completed_after=campaign.published_at - timedelta(days=1)
+                )
+                all_donations.extend(response.data)
+                chunk_missing = [x for x in response.data if x.id not in imported_ids]
+                missing.extend(chunk_missing)
 
-            if response.metadata.after is None or not response.data:
-                break
+                if response.metadata.after is None or not response.data:
+                    break
 
-            if response.metadata.after is not None:
-                after = response.metadata.after
+                if response.metadata.after is not None:
+                    after = response.metadata.after
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
 

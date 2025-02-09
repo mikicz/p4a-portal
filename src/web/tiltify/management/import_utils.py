@@ -3,7 +3,7 @@ from uuid import UUID
 from django.utils import timezone
 
 from src.client import schema
-from src.client.api import get_campaign, get_rewards
+from src.client.api import get_authenticated_session, get_campaign, get_rewards
 from src.web.tiltify.models import Campaign, Donation, Reward, RewardClaim
 
 
@@ -84,14 +84,15 @@ def create_donations_and_reward_claims(
 
 def import_rewards(campaign: Campaign):
     print("Importing rewards details")
-    rewards = []
-    after = None
-    while True:
-        rewards_response = get_rewards(campaign.uuid, after=after)
-        rewards.extend(rewards_response.data)
-        if rewards_response.metadata.after is None:
-            break
-        after = rewards_response.metadata.after
+    with get_authenticated_session() as session:
+        rewards = []
+        after = None
+        while True:
+            rewards_response = get_rewards(session, campaign.uuid, after=after)
+            rewards.extend(rewards_response.data)
+            if rewards_response.metadata.after is None:
+                break
+            after = rewards_response.metadata.after
 
     Reward.objects.update(active=False)
 
@@ -123,7 +124,8 @@ def import_rewards(campaign: Campaign):
 
 def import_campaign_details(campaign: Campaign):
     print("Importing campaign details")
-    c: schema.Campaign = get_campaign(campaign.uuid).data
+    with get_authenticated_session() as session:
+        c: schema.Campaign = get_campaign(session, campaign.uuid).data
     campaign.name = c.name
     campaign.slug = c.slug
     if c.team is not None and c.team.slug is not None:

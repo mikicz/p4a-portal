@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 from django.utils import timezone
 
 from src.client import schema
-from src.client.api import get_polls
+from src.client.api import get_authenticated_session, get_polls
 from src.web.tiltify.models import Campaign, Option, Poll
 
 
@@ -15,14 +15,15 @@ class Command(BaseCommand):
 
     def import_polls(self, campaign: Campaign):
         print("Importing polls details")
-        polls = []
-        after = None
-        while True:
-            polls_response = get_polls(campaign.uuid, after=after)
-            polls.extend(polls_response.data)
-            if polls_response.metadata.after is None:
-                break
-            after = polls_response.metadata.after
+        with get_authenticated_session() as session:
+            polls = []
+            after = None
+            while True:
+                polls_response = get_polls(session, campaign.uuid, after=after)
+                polls.extend(polls_response.data)
+                if polls_response.metadata.after is None:
+                    break
+                after = polls_response.metadata.after
 
         campaign.polls_refresh_finished = timezone.now()
         existing_polls = {x.id: x for x in Poll.objects.all()}

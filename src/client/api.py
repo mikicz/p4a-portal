@@ -1,17 +1,32 @@
+import contextlib
 import os
+from collections.abc import Generator
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 import requests
 from pydantic import BaseModel
+from requests.adapters import HTTPAdapter, Retry
 
 from src.client.schema import CampaignResponse, DonationResponse, PollResponse, RewardResponse
 
 api_token = os.environ.get("TILTIFY_TOKEN")
 
 
+@contextlib.contextmanager
+def get_authenticated_session() -> Generator[requests.Session, None, None]:
+    session = requests.Session()
+    retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 429])
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+
+    session.headers.update({"Authorization": f"Bearer {api_token}"})
+
+    yield session
+
+
 def _make_request(
+    session: requests.Session,
     campaign_uuid: UUID,
     response_cls: type[BaseModel],
     *,
@@ -23,35 +38,31 @@ def _make_request(
     if print_url:
         print(full_url, data)
 
-    response = requests.get(
-        full_url,
-        params=data,
-        headers={"Authorization": f"Bearer {api_token}"},
-    )
+    response = session.get(full_url, params=data)
     response.raise_for_status()
     return response_cls.parse_raw(response.content)
 
 
-def get_campaign(campaign_uuid: UUID) -> CampaignResponse:
-    return _make_request(campaign_uuid, CampaignResponse)
+def get_campaign(session: requests.Session, campaign_uuid: UUID) -> CampaignResponse:
+    return _make_request(session, campaign_uuid, CampaignResponse)
 
 
-def get_rewards(campaign_uuid: UUID, after: str | None = None) -> RewardResponse:
+def get_rewards(session: requests.Session, campaign_uuid: UUID, after: str | None = None) -> RewardResponse:
     data = {"limit": 100}
     if after is not None:
         data["after"] = after
-    return _make_request(campaign_uuid, RewardResponse, sub_url="rewards", print_url=True, data=data)
+    return _make_request(session, campaign_uuid, RewardResponse, sub_url="rewards", print_url=True, data=data)
 
 
-def get_polls(campaign_uuid: UUID, after: str | None = None) -> PollResponse:
+def get_polls(session: requests.Session, campaign_uuid: UUID, after: str | None = None) -> PollResponse:
     data = {"limit": 100}
     if after is not None:
         data["after"] = after
-    return _make_request(campaign_uuid, PollResponse, sub_url="polls", print_url=True, data=data)
+    return _make_request(session, campaign_uuid, PollResponse, sub_url="polls", print_url=True, data=data)
 
 
 def get_donations(
-    campaign_uuid: UUID, after: str | None = None, completed_after: datetime | None = None
+    session: requests.Session, campaign_uuid: UUID, after: str | None = None, completed_after: datetime | None = None
 ) -> DonationResponse:
     data = {"limit": 100}
     if after is not None:
@@ -59,7 +70,7 @@ def get_donations(
     if completed_after is not None:
         data["completed_after"] = completed_after.isoformat()
 
-    return _make_request(campaign_uuid, DonationResponse, sub_url="donations", data=data, print_url=True)
+    return _make_request(session, campaign_uuid, DonationResponse, sub_url="donations", data=data, print_url=True)
 
 
 if __name__ == "__main__":
@@ -67,5 +78,6 @@ if __name__ == "__main__":
     # print(get_campaign(id_))
     # print(get_rewards(id_))
     # print(get_polls(id_))
-    print(get_donations(id_))
+    with get_authenticated_session() as sesh:
+        print(get_donations(sesh, id_))
     # print(get_donations(id_, before=5706171))
