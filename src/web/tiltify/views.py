@@ -33,6 +33,7 @@ class CampaignView(DetailView):
         war, war_stream = self.get_decimal_war_statistics()
         data["decimal_war_statistics"] = json.dumps(war, indent=2)
         data["decimal_war_stream_statistics"] = json.dumps(war_stream, indent=2)
+        data["donation_breakdown"] = json.dumps(self.get_donation_breakdown(), indent=2)
 
         data["polls_v2"] = self.get_polls()
         data["rewards"] = (
@@ -333,3 +334,22 @@ class CampaignView(DetailView):
             final_data[row.poll__id]["total"] += row.total_amount_raised
 
         return list(final_data.values())
+
+    def get_donation_breakdown(self):
+        donations = pd.DataFrame.from_records(Donation.objects.filter(campaign=self.object).values("amount")).astype(
+            {"amount": float}
+        )
+        if donations.empty:
+            return None
+
+        values = []
+
+        max_value = donations["amount"].max()
+        i = 0
+        while i < max_value:
+            count = len(donations[(donations["amount"] >= i) & (donations["amount"] < i + 10)])
+            if count:
+                values.append((i, i + 10, count))
+            i += 10
+
+        return values

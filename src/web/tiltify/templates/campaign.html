@@ -24,6 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.3/js/jquery_wrapper.min.js"
             integrity="sha512-Q+u5tqLUv7zbQ1QBm6Pcwc2N2PbqrRC//Ze2YGnlSe5TBbO0KrCYZ/WvgjTlNnzVtOHU9pNoztQjJxpSXa5boQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.3/css/tabulator.min.css"
           integrity="sha512-gHU0A38WiT7Jyubh7KcU6af64wRVBnNEB1541Ue5W050dRL/f21IWkAD8sl85nVjPyLnbffiXsCborGDQ55bYQ=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -37,6 +38,7 @@
         let donationStatistics = {{ donation_statistics|safe }};
         let rewardCombinations = {{ reward_combinations|safe }};
         let moneyFormatterParams = {"symbol": "$"};
+        let donationsBreakdown = {{ donation_breakdown|safe }};
 
         function percentage(cell, formatterParams, onRendered) {
             return Math.round(cell.getValue() * 100) / 100 + " %"
@@ -127,6 +129,55 @@
                 layout: "fitColumns",
                 columns: decimalWarColumns,
             });
+
+            // Transform data for Chart.js
+            const labels = donationsBreakdown.map(([start, end]) => `$${start}-$${end}`);
+            const data = donationsBreakdown.map(([,,count]) => count);
+
+            // Create the chart
+            const ctx = document.getElementById('donationsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Donations',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Donations'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Donation Range'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Donations Breakdown'
+                        }
+                    }
+                }
+            });
         })
 
     </script>
@@ -195,6 +246,12 @@
         <button class="nav-link" id="polls-tab" data-bs-toggle="tab" data-bs-target="#polls-tab-pane"
                 type="button" role="tab" aria-controls="polls-tab-pane" aria-selected="false">
             Polls
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="donations-breakdown-tab" data-bs-toggle="tab" data-bs-target="#donations-breakdown-tab-pane"
+                type="button" role="tab" aria-controls="donations-breakdown-pane" aria-selected="false">
+            Donations breakdown
         </button>
     </li>
 </ul>
@@ -428,6 +485,17 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="donations-breakdown-tab-pane" role="tabpanel" aria-labelledby="donations-breakdown-tab" tabindex="0">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div style="max-width: 1200px; max-height: 600px; margin: 0 auto;">
+                        <canvas id="donationsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
