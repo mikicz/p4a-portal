@@ -131,7 +131,7 @@
             });
 
             // Transform data for Chart.js
-            const labels = donationsBreakdown.map(([start, end]) => `$${start}-$${end}`);
+            const labels = donationsBreakdown.map(([start, end]) => `($${start}-$${end}]`);
             const data = donationsBreakdown.map(([,,count]) => count);
 
             // Create the chart
@@ -493,6 +493,13 @@
         <div class="container">
             <div class="row">
                 <div class="col">
+                    <h2>Donations breakdown</h2>
+                    <p>
+                    {% if object.stats_refresh_finished %}
+                        Data last retrieved {{ object.stats_refresh_finished|date:"N j, Y, P T" }}.
+                    {% endif %}
+                        Start of range is inclusive, end of range is not exclusive. X axis is not proportional to size of donation.
+                    </p>
                     <div style="max-width: 1200px; max-height: 600px; margin: 0 auto;">
                         <canvas id="donationsChart"></canvas>
                     </div>
