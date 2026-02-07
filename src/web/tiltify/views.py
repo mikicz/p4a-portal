@@ -7,8 +7,11 @@ from uuid import UUID
 import pandas as pd
 from django.db import models
 from django.db.models import Count, ExpressionWrapper, Max, Min, Q, Sum
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.utils import timezone
 from django.views.generic import DetailView, ListView
+from django.views.generic.base import View
 
 from .models import Campaign, Donation, Option, Reward, RewardClaim
 
@@ -353,3 +356,13 @@ class CampaignView(DetailView):
             i += 10
 
         return values
+
+
+class WebhookView(View):
+    def get(self, request, *args, **kwargs):
+        return HttpResponse("OK")
+
+    def post(self, request: HttpRequest, *args, **kwargs):
+        print(request.content_type)
+        print(request.body)
+        return HttpResponse("OK")
