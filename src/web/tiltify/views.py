@@ -360,10 +360,13 @@ class CampaignView(DetailView):
 
 
 class WebhookView(View):
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         return HttpResponse("OK")
 
-    @csrf_exempt
     def post(self, request: HttpRequest, *args, **kwargs):
         print(request.content_type)
         print(request.body)
