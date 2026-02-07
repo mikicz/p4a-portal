@@ -10,6 +10,7 @@ from django.db.models import Count, ExpressionWrapper, Max, Min, Q, Sum
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import View
 
@@ -362,6 +363,7 @@ class WebhookView(View):
     def get(self, request, *args, **kwargs):
         return HttpResponse("OK")
 
+    @csrf_exempt
     def post(self, request: HttpRequest, *args, **kwargs):
         print(request.content_type)
         print(request.body)
