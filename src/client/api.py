@@ -15,7 +15,7 @@ api_token = os.environ.get("TILTIFY_TOKEN")
 
 
 @contextlib.contextmanager
-def get_authenticated_session() -> Generator[requests.Session, None, None]:
+def get_authenticated_session() -> Generator[requests.Session]:
     session = requests.Session()
     retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 429])
     session.mount("https://", HTTPAdapter(max_retries=retries))
