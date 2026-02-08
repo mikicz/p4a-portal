@@ -10,6 +10,6 @@ def process_webhook_task(data: str) -> None:
     print(webhook)
 
     return {
-        "campaign_id": webhook.data.campaign_id,
-        "donation_id": webhook.data.id,
+        "campaign_id": str(webhook.data.campaign_id),
+        "donation_id": str(webhook.data.id),
     }
