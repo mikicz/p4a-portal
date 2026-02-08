@@ -82,6 +82,7 @@ class RewardClaim(BaseTiltifyModel):
     id: UUID
     quantity: int
     reward_id: UUID | None
+    custom_question: str | None
 
 
 class Donation(BaseTiltifyModel):
@@ -107,15 +108,15 @@ class WebhookMeta(BaseTiltifyModel):
 
 class WebhookDonationData(Donation):
     campaign_id: UUID
-    cause_id: UUID
+    cause_id: UUID | None
     created_at: datetime.datetime
     email: str | None
-    fundraising_event_id: UUID
+    fundraising_event_id: UUID | None
     reward_custom_question: str | None
     reward_id: UUID | None
     sustained: bool
-    target_id: UUID
-    team_event_id: UUID
+    target_id: UUID | None
+    team_event_id: UUID | None
 
 
 class DonationWebhook(BaseTiltifyModel):
