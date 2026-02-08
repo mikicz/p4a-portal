@@ -79,6 +79,6 @@ def process_webhook_task(data: str) -> None:
     currently_reward_claims_created = RewardClaim.objects.bulk_create(reward_claims_to_create, ignore_conflicts=True)
 
     return result | {
-        "currently_donations_created": currently_donations_created,
-        "currently_reward_claims_created": currently_reward_claims_created,
+        "currently_donations_created": len(currently_donations_created),
+        "currently_reward_claims_created": len(currently_reward_claims_created),
     }
