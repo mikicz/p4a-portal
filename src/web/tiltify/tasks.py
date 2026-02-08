@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.tasks import task
 
 from src.client.schema import DonationWebhook, WebhookDonationData
@@ -46,13 +46,22 @@ def get_polls_and_options(campaign: Campaign, donation: WebhookDonationData) -> 
 def process_webhook_task(data: str) -> None:
     webhook = DonationWebhook.parse_raw(data)
     result = {
-        "campaign_id": str(webhook.data.campaign_id),
+        "campaign_id": str(webhook.data.campaign_id) if webhook.data.campaign_id else None,
         "donation_id": str(webhook.data.id),
     }
-    try:
-        campaign = Campaign.objects.get(uuid=webhook.data.campaign_id, keep_refreshing=True)
-    except ObjectDoesNotExist:
-        return result | {"error": "Campaign not found"}
+
+    if webhook.data.campaign_id is None:
+        # We do not have a campaign ID in the webhook, so let's see if there's a singular compaign
+        # that is supposed to be refreshed, and use that if there is one
+        try:
+            campaign = Campaign.objects.get(keep_refreshing=True)
+        except ObjectDoesNotExist, MultipleObjectsReturned:
+            return result | {"error": "Campaign ID empty"}
+    else:
+        try:
+            campaign = Campaign.objects.get(uuid=webhook.data.campaign_id, keep_refreshing=True)
+        except ObjectDoesNotExist:
+            return result | {"error": "Campaign not found"}
 
     if Donation.objects.filter(campaign=campaign, id=webhook.data.id).exists():
         return result | {"error": "Donation already exists"}

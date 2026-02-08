@@ -107,7 +107,7 @@ class WebhookMeta(BaseTiltifyModel):
 
 
 class WebhookDonationData(Donation):
-    campaign_id: UUID
+    campaign_id: UUID | None
     cause_id: UUID | None
     created_at: datetime.datetime
     email: str | None
