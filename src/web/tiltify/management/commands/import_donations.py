@@ -45,7 +45,7 @@ class Command(BaseCommand):
         polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
         options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
-        seen_ids = {}
+        seen_ids = set()
 
         with get_authenticated_session() as session:
             while True:
