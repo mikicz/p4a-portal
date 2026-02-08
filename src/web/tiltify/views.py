@@ -369,6 +369,6 @@ class WebhookView(View):
         return HttpResponse("OK")
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        task_result = process_webhook_task.enqueue(request.body)
+        task_result = process_webhook_task.enqueue(data=request.body.decode("utf-8"))
 
         return HttpResponse(task_result.id)

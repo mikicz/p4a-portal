@@ -96,6 +96,33 @@ class Donation(BaseTiltifyModel):
     poll_option_id: UUID | None
 
 
+class WebhookMeta(BaseTiltifyModel):
+    id: UUID
+    event_type: str
+    generated_at: datetime.datetime
+    attempted_at: datetime.datetime
+    subscription_source_id: UUID
+    subscription_source_type: str
+
+
+class WebhookDonationData(Donation):
+    campaign_id: UUID
+    cause_id: UUID
+    created_at: datetime.datetime
+    email: str | None
+    fundraising_event_id: UUID
+    reward_custom_question: str | None
+    reward_id: UUID | None
+    sustained: bool
+    target_id: UUID
+    team_event_id: UUID
+
+
+class DonationWebhook(BaseTiltifyModel):
+    data: WebhookDonationData
+    meta: WebhookMeta
+
+
 class DonationList(BaseTiltifyModel):
     donations: list[Donation]
 
