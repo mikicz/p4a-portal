@@ -93,4 +93,4 @@ class Command(BaseCommand):
         )
 
         # update the ones we saw in command
-        Donation.objects.filter(id__in=seen_ids.keys(), loaded_from_webhook=True).update(loaded_from_webhook=False)
+        Donation.objects.filter(id__in=seen_ids, loaded_from_webhook=True).update(loaded_from_webhook=False)
