@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from django.utils import timezone
@@ -13,6 +14,7 @@ def build_donation(
     api_donation: schema.Donation,
     polls: set[UUID],
     options: set[UUID],
+    **donation_kwargs: dict[str, Any],
 ) -> tuple[Donation, list[RewardClaim]]:
     reward_claims = []
 
@@ -51,6 +53,7 @@ def build_donation(
         completed_at=api_donation.completed_at,
         poll_id=poll_id,
         poll_option_id=option_id,
+        **donation_kwargs,
     )
 
     return donation, reward_claims

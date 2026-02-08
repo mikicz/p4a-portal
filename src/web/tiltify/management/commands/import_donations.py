@@ -36,18 +36,23 @@ class Command(BaseCommand):
         imported_ids = set(donation_queryset.values_list("id", flat=True))
         completed_after = campaign.published_at - timedelta(days=1)
         if donation_queryset.exists():
-            completed_after = donation_queryset.latest("completed_at").completed_at - timedelta(minutes=30)
+            completed_after = donation_queryset.filter(loaded_from_webhook=False).latest(
+                "completed_at"
+            ).completed_at - timedelta(minutes=30)
 
         reward_map = {reward.uuid: reward for reward in Reward.objects.filter(campaign=campaign)}
 
         polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
         options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
+        seen_ids = set()
+
         with get_authenticated_session() as session:
             while True:
                 response = get_donations(session, campaign.uuid, after=after, completed_after=completed_after)
 
                 not_imported_yet = [x for x in response.data if x.id not in imported_ids]
+                seen_ids.update({x.id for x in response.data})
                 to_create.extend(not_imported_yet)
                 imported_ids.update([x.id for x in response.data])
 
@@ -86,3 +91,6 @@ class Command(BaseCommand):
             "created reward claims",
             created_claims,
         )
+
+        # update the ones we saw in command
+        Donation.objects.filter(id__in=seen_ids, loaded_from_webhook=True).update(loaded_from_webhook=False)
