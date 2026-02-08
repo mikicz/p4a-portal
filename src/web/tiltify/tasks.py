@@ -60,7 +60,9 @@ def process_webhook_task(data: str) -> None:
     reward_map = get_reward_map(campaign, webhook.data)
     polls, options = get_polls_and_options(campaign, webhook.data)
 
-    donation_to_create, reward_claims_to_create = build_donation(campaign, reward_map, webhook.data, polls, options)
+    donation_to_create, reward_claims_to_create = build_donation(
+        campaign, reward_map, webhook.data, polls, options, loaded_from_webhook=True
+    )
 
     currently_donations_created = Donation.objects.bulk_create([donation_to_create], ignore_conflicts=True)
     currently_reward_claims_created = RewardClaim.objects.bulk_create(reward_claims_to_create, ignore_conflicts=True)

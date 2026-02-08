@@ -104,6 +104,8 @@ class Donation(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
     poll_option = models.ForeignKey(Option, on_delete=models.CASCADE, null=True, blank=True)
 
+    loaded_from_webhook = models.BooleanField(default=False, db_default=False)
+
     def __str__(self):
         return f"Donation<{self.id}, {self.name}>"
 
