@@ -4,7 +4,7 @@ from src.client.schema import DonationWebhook
 
 
 @task
-def process_webhook_task(*, data: str) -> None:
+def process_webhook_task(data: str) -> None:
     webhook = DonationWebhook.parse_raw(data)
 
     print(webhook)
