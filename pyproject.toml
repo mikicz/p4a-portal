@@ -27,6 +27,7 @@ dependencies = [
     "sentry-sdk>=2.8.0",
     "ipython>=8.10.0",
     "django-extensions>=4",
+    "django-tasks-db>=0.12.0",
 ]
 
 

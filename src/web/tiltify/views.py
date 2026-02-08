@@ -15,6 +15,7 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.base import View
 
 from .models import Campaign, Donation, Option, Reward, RewardClaim
+from .tasks import process_webhook_task
 
 
 class CampaignsView(ListView):
@@ -368,6 +369,6 @@ class WebhookView(View):
         return HttpResponse("OK")
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        print(request.content_type)
-        print(request.body)
-        return HttpResponse("OK")
+        task_result = process_webhook_task.enqueue(request.body)
+
+        return HttpResponse(task_result.id)

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "src.web.tiltify",
     "django_extensions",
+    "django_tasks_db",
 ]
 
 MIDDLEWARE = [
@@ -124,3 +125,5 @@ PROJECT_URL = "http://localhost:8000/"
 
 with contextlib.suppress(ImportError):
     from src.web.local_settings import *  # noqa
+
+TASKS = {"default": {"BACKEND": "django_tasks_db.DatabaseBackend", "QUEUES": ["default"]}}
