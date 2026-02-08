@@ -13,10 +13,11 @@ def get_reward_map(campaign: Campaign, donation: WebhookDonationData) -> dict[UU
     reward_ids = set()
     if donation.reward_id:
         reward_ids.add(donation.reward_id)
-    for reward_claim in donation.reward_claims:
-        if reward_claim.reward_id is None:
-            continue
-        reward_ids.add(reward_claim.reward_id)
+    if donation.reward_claims:
+        for reward_claim in donation.reward_claims:
+            if reward_claim.reward_id is None:
+                continue
+            reward_ids.add(reward_claim.reward_id)
 
     if not reward_ids:
         return {}
@@ -33,11 +34,12 @@ def get_polls_and_options(campaign: Campaign, donation: WebhookDonationData) -> 
     polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
     options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
-    if donation.poll_id not in polls or donation.poll_option_id not in options:
+    if (donation.poll_id and donation.poll_id not in polls) or (
+        donation.poll_option_id and donation.poll_option_id not in options
+    ):
         import_polls(campaign)
-
-    polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
-    options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
+        polls = set(Poll.objects.filter(campaign=campaign).values_list("id", flat=True))
+        options = set(Option.objects.filter(poll__campaign=campaign).values_list("id", flat=True))
 
     return polls, options
 
