@@ -19,12 +19,12 @@ from .tasks import process_webhook_task
 
 
 class CampaignsView(ListView):
-    model = Campaign
+    queryset = Campaign.objects.exclude(name__isnull=True).exclude(name="")
     template_name = "campaigns.html"
 
 
 class CampaignView(DetailView):
-    model = Campaign
+    queryset = Campaign.objects.exclude(name__isnull=True).exclude(name="")
     template_name = "campaign.html"
 
     def get_context_data(self, **kwargs):

@@ -9,6 +9,7 @@ import requests
 from pydantic import BaseModel
 from requests.adapters import HTTPAdapter, Retry
 
+from src.client.exceptions import CampaignNotFoundError
 from src.client.schema import CampaignResponse, DonationResponse, PollResponse, RewardResponse
 
 api_token = os.environ.get("TILTIFY_TOKEN")
@@ -44,7 +45,12 @@ def _make_request(
 
 
 def get_campaign(session: requests.Session, campaign_uuid: UUID) -> CampaignResponse:
-    return _make_request(session, campaign_uuid, CampaignResponse)
+    try:
+        return _make_request(session, campaign_uuid, CampaignResponse)
+    except requests.HTTPError as e:
+        if e.response.status_code == 404:
+            raise CampaignNotFoundError(campaign_uuid) from e
+        raise e
 
 
 def get_rewards(session: requests.Session, campaign_uuid: UUID, after: str | None = None) -> RewardResponse:

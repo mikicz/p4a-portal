@@ -4,13 +4,20 @@ from django.core.management import BaseCommand
 
 from src.client import schema
 from src.client.api import get_authenticated_session, get_donations
-from src.web.tiltify.management.import_utils import create_donations_and_reward_claims
+from src.client.exceptions import CampaignNotFoundError
+from src.web.tiltify.management.import_utils import create_donations_and_reward_claims, import_campaign_details
 from src.web.tiltify.models import Campaign, Donation, Option, Poll, Reward
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for campaign in Campaign.objects.filter(keep_refreshing=True).exclude(uuid=None):
+            try:
+                if not campaign.name:
+                    import_campaign_details(campaign)
+            except CampaignNotFoundError:
+                print(f"Campaign {campaign.uuid} not found")
+                continue
             self.check_import_campaign(campaign)
 
     def check_import_campaign(self, campaign: Campaign):

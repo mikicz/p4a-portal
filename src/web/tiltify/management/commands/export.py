@@ -16,10 +16,14 @@ class Command(BaseCommand):
         parser.add_argument("path", type=str)
 
     def handle(self, *args, **options):
+        campaign = Campaign.objects.get(id=options["id"])
+        if not campaign.name:  # not imported yet
+            print("Campaign has no name, skipping")
+            return
+
         repo = git.Repo(options["path"])
         repo.remote().pull()
 
-        campaign = Campaign.objects.get(id=options["id"])
         url = reverse("campaign", args=[campaign.id])
         response = requests.get(settings.PROJECT_URL.rstrip("/") + url)
 
