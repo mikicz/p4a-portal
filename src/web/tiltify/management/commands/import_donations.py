@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
         imported_ids = set(donation_queryset.values_list("id", flat=True))
         completed_after = campaign.published_at - timedelta(days=1)
-        if donation_queryset.exists():
+        if donation_queryset.filter(loaded_from_webhook=False).exists():
             completed_after = donation_queryset.filter(loaded_from_webhook=False).latest(
                 "completed_at"
             ).completed_at - timedelta(minutes=30)
