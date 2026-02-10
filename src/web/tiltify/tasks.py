@@ -22,12 +22,12 @@ def get_reward_map(campaign: Campaign, donation: WebhookDonationData) -> dict[UU
     if not reward_ids:
         return {}
 
-    reward_map = {x.uuid: x for x in Reward.objects.filters(campaign=campaign, uuid__in=reward_ids)}
+    reward_map = {x.uuid: x for x in Reward.objects.filter(campaign=campaign, uuid__in=reward_ids)}
 
     if len(reward_map) != len(reward_ids):
         import_rewards(campaign)
 
-    return {x.uuid: x for x in Reward.objects.filters(campaign=campaign, uuid__in=reward_ids)}
+    return {x.uuid: x for x in Reward.objects.filter(campaign=campaign, uuid__in=reward_ids)}
 
 
 def get_polls_and_options(campaign: Campaign, donation: WebhookDonationData) -> tuple[set[int], set[int]]:
