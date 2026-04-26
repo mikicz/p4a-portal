@@ -22,7 +22,7 @@ dependencies = [
     "psycopg-binary>3",
     "pandas<3",
     "numpy",
-    "gitpython>=3.1.30",
+    "gitpython>=3.1.47",
     "gunicorn>=23.0.0",
     "sentry-sdk>=2.8.0",
     "ipython>=8.10.0",
